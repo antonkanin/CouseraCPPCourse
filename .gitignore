@@ -1,0 +1,14 @@
+Debug/
+Release/
+
+CourseraCPP/Debug/
+CourseraCPP/Debug/
+
+.vs/
+
+*.sdf
+*.opensdf
+*.suo
+*.zip
+
+
