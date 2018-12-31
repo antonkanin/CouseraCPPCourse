@@ -1,17 +1,25 @@
-//#include "pch.h"
+#include "pch.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
-void processCapitals(istream& inputStream)
+void RunProgram(istream& inputStream)
 {
 	int count;
 	inputStream >> count;
+
+	// mas of bus routes, each route is a vector of stops
+	map<string, vector<string>> busRoutes;
+
+	// map of stops, each stop is a vector 
+	map<string, vector<string>> busStops;
+
 	map<string, string> capitals;
 	vector<string> result;
 
@@ -20,73 +28,105 @@ void processCapitals(istream& inputStream)
 		string command;
 		inputStream >> command;
 
-		if (command == "CHANGE_CAPITAL")
+		if (command == "NEW_BUS")
 		{
-			string country, newCapital;
-			inputStream >> country >> newCapital;
+			string bus;
+			inputStream >> bus;
+			
+			int stopsCount;
+			inputStream >> stopsCount;
 
-			if (capitals.count(country) == 0)
+			vector<string> stops;
+			for (int stopIndex = 0; stopIndex < stopsCount; ++stopIndex)
 			{
-				result.push_back("Introduce new country " + country + " with capital " + newCapital);
-			}
-			else if (capitals[country] == newCapital)
-			{
-				result.push_back("Country " + country + " hasn't changed its capital");
-			}
-			else
-			{
-				result.push_back("Country " + country + " has changed its capital from " + capitals[country] +
-					" to " + newCapital);
+				string stopName;
+				inputStream >> stopName;
+				stops.push_back(stopName);
+
+				// adding the bus route to the current stop
+				busStops[stopName].push_back(bus);
 			}
 
-			capitals[country] = newCapital;
+			busRoutes[bus] = stops;
 		}
 
-		else if (command == "RENAME")
+		else if (command == "BUSES_FOR_STOP")
 		{
-			string oldCountry, newCountry;
-			inputStream >> oldCountry >> newCountry;
-
-			if (oldCountry == newCountry || capitals.count(oldCountry) == 0 || capitals.count(newCountry) > 0)
+			string stop;
+			inputStream >> stop;
+			if (busStops.count(stop) == 0)
 			{
-				result.push_back("Incorrect rename, skip");
+				result.push_back("No stop");
 			}
 			else
 			{
-				result.push_back("Country " + oldCountry + " with capital " + capitals[oldCountry] +
-					" has been renamed to " + newCountry);
-				capitals[newCountry] = capitals[oldCountry];
-				capitals.erase(oldCountry);
-			}
-		}
-		else if (command == "ABOUT")
-		{
-			string country;
-			inputStream >> country;
-
-			if (capitals.count(country) == 0)
-			{
-				result.push_back("Country " + country + " doesn't exist");
-			}
-			else
-			{
-				result.push_back("Country " + country + " has capital " + capitals[country]);
-			}
-		}
-		else if (command == "DUMP")
-		{
-			if (capitals.size() == 0)
-			{
-				result.push_back("There are no countries in the world");
-			}
-			else
-			{
-				string countriesList;
-				for (const auto& country : capitals)
+				string busesList;
+				for (const auto& bus : busStops[stop])
 				{
-					countriesList += country.first + "/" + country.second + " ";
+					busesList += bus + " ";
 				}
-				result.push_back(countriesList);
+				result.push_back(busesList);
+			}
+				
+		}
+		else if (command == "STOPS_FOR_BUS")
+		{
+			string busInput;
+			inputStream >> busInput;
+			if (busRoutes.count(busInput) == 0)
+			{
+				result.push_back("No bus");
+			}
+			else
+			{
+				// go through each Bus Stop for a given bus
+				for (const auto& stop : busRoutes[busInput])
+				{
+					// if this stop has more then 1 buses
+					if (busStops[stop].size() > 1)
+					{
+						string resultLine = "Stop " + stop + ": ";
+						for (const auto& bus : busStops[stop])
+						{
+							if (bus != busInput)
+							{
+								resultLine += bus + " ";
+							}
+						}
+						result.push_back(resultLine);
+					}
+					else
+					{
+						result.push_back("Stop " + stop + ": no interchange");
+					}
+				}
+			}
+		}
+
+		else if (command == "ALL_BUSES")
+		{
+			//sort(busRoutes.begin(), busRoutes.end(), 
+			//	[](const string& a, const string& b) -> bool
+			//{
+			//	return a > b;
+			//});
+
+			if (busRoutes.size() == 0)
+			{
+				result.push_back("No buses");
+			}
+			else
+			{
+				for (const auto& route : busRoutes)
+				{
+					string resultLine = "Bus " + route.first + ": ";
+					for (const auto& stop : route.second)
+					{
+						resultLine += stop + " ";
+					}
+					result.push_back(resultLine);
+				}
+
 			}
 		}
 	}
@@ -102,10 +142,10 @@ int main()
 	//ifstream file("input.txt");
 	//if (file.is_open())
 	//{
-	//	processCapitals(file);
+	//	RunProgram(file);
 	//	file.close();
 	//}
 
-	processCapitals(cin);
+	RunProgram(cin);
 }
 
