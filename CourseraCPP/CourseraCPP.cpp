@@ -15,59 +15,33 @@ void RunProgram(istream& inputStream)
 	int linesCount;
 	inputStream >> linesCount;
 
-	set<set<string>> dictionary;
-
-	map<string, int> synonymCounter;
+	map<set<string>, int> busStops;
 
 	vector<string> result;
 
 	for (int lineIndex = 0; lineIndex < linesCount; ++lineIndex)
 	{
-		string command;
-		inputStream >> command;
+		int stopsCount;
+		inputStream >> stopsCount;
 
-		if (command == "ADD")
+		set<string> stopsSet;
+
+		for (int stopIndex = 0; stopIndex < stopsCount; stopIndex++)
 		{
-			string word1, word2;
-			inputStream >> word1 >> word2;
-
-			if (dictionary.count({ word1, word2 }) == 0)
-			{
-				synonymCounter[word1]++;
-				synonymCounter[word2]++;
-				dictionary.insert({ word1, word2 });
-			}
-			
+			string stop;
+			inputStream >> stop;
+			stopsSet.insert(stop);
 		}
 
-		else if (command == "COUNT")
+		if (busStops.count(stopsSet) == 0)
 		{
-			string word;
-			inputStream >> word;
-
-			if (synonymCounter.count(word) > 0)
-			{
-				result.push_back(to_string(synonymCounter[word]));
-			}
-			else
-			{
-				result.push_back("0");
-			}
+			const int number = busStops.size() + 1;
+			busStops[stopsSet] = number;
+			result.push_back("New bus " + to_string(number));
 		}
-
-		else if (command == "CHECK")
+		else
 		{
-			string word1, word2;
-			inputStream >> word1 >> word2;
-
-			if (dictionary.count({word1, word2}) > 0)
-			{
-				result.push_back("YES");
-			}
-			else
-			{
-				result.push_back("NO");
-			}
+			result.push_back("Already exists for " + to_string(busStops[stopsSet]));
 		}
 	}
 

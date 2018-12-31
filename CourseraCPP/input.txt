@@ -1,17 +1,11 @@
-8
+5
 
-ADD program code
+2 Marushkino Kokoshkino
 
-COUNT cipher
+1 Kokoshkino
 
-ADD code cipher
+2 Marushkino Kokoshkino
 
-COUNT code
+2 Kokoshkino Marushkino
 
-COUNT program
-
-CHECK code program
-
-CHECK program cipher
-
-CHECK cpp java
+2 Kokoshkino Kokoshkino
