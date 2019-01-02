@@ -1,65 +1,100 @@
 //#include "pch.h"
-
+#include <algorithm>
+#include <map>
+#include <vector>
+#include <ostream>
 #include <iostream>
 #include <string>
-#include <vector>
-#include <map>
-#include <fstream>
-#include <algorithm>
-#include <set>
 
 using namespace std;
 
-void RunProgram(istream& inputStream)
+//struct Image {
+//	double quality;
+//	double freshness;
+//	double rating;
+//};
+//
+//struct Params {
+//	double a;
+//	double b;
+//	double c;
+//};
+
+struct FunctionParts
 {
-	int linesCount;
-	inputStream >> linesCount;
+	char operation;
+	double value;
+};
 
-	map<set<string>, int> busStops;
-
-	vector<string> result;
-
-	for (int lineIndex = 0; lineIndex < linesCount; ++lineIndex)
+class Function
+{
+public:
+	void AddPart(char new_operator, double value)
 	{
-		int stopsCount;
-		inputStream >> stopsCount;
+		parts.push_back({ new_operator, value });
+	}
 
-		set<string> stopsSet;
-
-		for (int stopIndex = 0; stopIndex < stopsCount; stopIndex++)
+	void Invert()
+	{
+		for (auto& part : parts)
 		{
-			string stop;
-			inputStream >> stop;
-			stopsSet.insert(stop);
-		}
-
-		if (busStops.count(stopsSet) == 0)
-		{
-			const int number = busStops.size() + 1;
-			busStops[stopsSet] = number;
-			result.push_back("New bus " + to_string(number));
-		}
-		else
-		{
-			result.push_back("Already exists for " + to_string(busStops[stopsSet]));
+			if (part.operation == '+')
+			{
+				part.operation = '-';
+			}
+			else
+			{
+				part.operation = '+';
+			}
 		}
 	}
 
-	for (const auto& value : result)
+	double Apply(double source_value) const
 	{
-		cout << value << endl;
+		for (const auto& part : parts)
+		{
+			if (part.operation == '+')
+			{
+				source_value += part.value;
+			}
+			else
+			{
+				source_value -= part.value;
+			}
+		}
+
+		return  source_value;
 	}
+
+private:
+	vector<FunctionParts> parts;
+};
+
+Function MakeWeightFunction(const Params& params,
+	const Image& image) {
+	Function function;
+	function.AddPart('-', image.freshness * params.a + params.b);
+	function.AddPart('+', image.rating * params.c);
+	return function;
 }
 
-int main()
-{
-	//ifstream file("input.txt");
-	//if (file.is_open())
-	//{
-	//	RunProgram(file);
-	//	file.close();
-	//}
-
-	RunProgram(cin);
+double ComputeImageWeight(const Params& params, const Image& image) {
+	Function function = MakeWeightFunction(params, image);
+	return function.Apply(image.quality);
 }
 
+double ComputeQualityByWeight(const Params& params,
+	const Image& image,
+	double weight) {
+	Function function = MakeWeightFunction(params, image);
+	function.Invert();
+	return function.Apply(weight);
+}
+
+int main() {
+	Image image = { 10, 2, 6 };
+	Params params = { 4, 2, 6 };
+	cout << ComputeImageWeight(params, image) << endl;
+	cout << ComputeQualityByWeight(params, image, 46) << endl;
+	return 0;
+}
