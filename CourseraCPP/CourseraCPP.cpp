@@ -38,15 +38,27 @@ public:
 	{
 		for (auto& part : parts)
 		{
-			if (part.operation == '+')
+			switch (part.operation)
 			{
+			case '+':
 				part.operation = '-';
-			}
-			else
-			{
+				break;
+			case '-':
 				part.operation = '+';
+				break;
+			case '*':
+				part.operation = '/';
+				break;
+			case '/':
+				part.operation = '*';
+				break;
+			default:
+				cout << "Case not supported" << endl;
+				break;
 			}
 		}
+
+		reverse(begin(parts), end(parts));
 	}
 
 	double Apply(double source_value) const
@@ -57,9 +69,17 @@ public:
 			{
 				source_value += part.value;
 			}
-			else
+			else if (part.operation == '-')
 			{
 				source_value -= part.value;
+			} 
+			else if (part.operation == '*')
+			{
+				source_value *= part.value;
+			}
+			else if (part.operation == '/')
+			{
+				source_value /= part.value;
 			}
 		}
 
@@ -73,7 +93,8 @@ private:
 Function MakeWeightFunction(const Params& params,
 	const Image& image) {
 	Function function;
-	function.AddPart('-', image.freshness * params.a + params.b);
+	function.AddPart('*', params.a);
+	function.AddPart('-', image.freshness * params.b);
 	function.AddPart('+', image.rating * params.c);
 	return function;
 }
@@ -95,6 +116,6 @@ int main() {
 	Image image = { 10, 2, 6 };
 	Params params = { 4, 2, 6 };
 	cout << ComputeImageWeight(params, image) << endl;
-	cout << ComputeQualityByWeight(params, image, 46) << endl;
+	cout << ComputeQualityByWeight(params, image, 52) << endl;
 	return 0;
 }
