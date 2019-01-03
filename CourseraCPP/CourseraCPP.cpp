@@ -1,93 +1,114 @@
 //#include "pch.h"
-
-#include <fstream>
 #include <iostream>
-#include <string>
-#include <iomanip>
-#include <set>
-#include <vector>
 
 using namespace std;
 
-struct Student
+int getGCD(int a, int b)
 {
-	string firstName;
-	string lastName;
-	int day;
-	int month;
-	int year;
-};
-
-void DoWork(istream& inputStream)
-{
-	int studentsCount;
-	inputStream >> studentsCount;
-
-	vector<Student> students;
-
-	for (int i = 0; i < studentsCount; ++i)
-	{
-		Student student;
-		inputStream >> student.firstName >> student.lastName >> student.day >> student.month >> student.year;
-
-		const int MAX_VAL = 1000000000;
-		if (student.day > MAX_VAL || student.month > MAX_VAL || student.year > MAX_VAL)
-		{
-			cout << "bad request" << endl;
-		}
-		else
-		{
-			students.push_back(student);
-		}
-	}
-
-	int outputCount;
-	inputStream >> outputCount;
-
-	for (int i = 0; i < outputCount; ++i)
-	{
-		string operation;
-		string studentPositionStr;
-		inputStream >> operation >> studentPositionStr;
-
-		int studentPosition = 0;
-
-		try
-		{
-			studentPosition = stoi(studentPositionStr);
-		}
-		catch (std::invalid_argument)
-		{
-			cout << "bad request" << endl;
-			continue;
-		}
-		
-
-		if (studentPosition < 1 || studentPosition > students.size())
-		{
-			cout << "bad request" << endl;
-			continue;
-		}
-
-		if (operation == "name")
-		{
-			cout << students[studentPosition - 1].firstName << " " << students[studentPosition - 1].lastName << endl;
-		}
-		else if (operation == "date")
-		{
-			cout << students[studentPosition - 1].day << "." << students[studentPosition - 1].month << "." << students[studentPosition - 1].year << endl;
-		}
-		else
-		{
-			cout << "bad request" << endl;
-		}
-	}
+	return b == 0 ? a : getGCD(b, a % b);
 }
 
-int main() 
+class Rational
 {
-	//ifstream file("input.txt");
-	//DoWork(file);
+public:
+	Rational()
+	{
+		numberator = 0;
+		denominator = 1;
+	}
 
-	DoWork(cin);
+	Rational(int numerator, int denominator)
+	{
+		if (denominator < 0)
+		{
+			denominator = abs(denominator);
+			numerator = -1 * numerator;
+		}
+
+		int gcd = getGCD(abs(numerator), abs(denominator));
+		this->numberator = numerator / gcd;
+
+		if (numerator == 0)
+		{
+			this->denominator = 1;
+		}
+		else
+		{
+			this->denominator = denominator / gcd;
+		}
+	}
+
+	int Numerator() const
+	{
+		return numberator;
+	}
+
+	int Denominator() const
+	{
+		return denominator;
+	}
+
+private:
+	int numberator;
+	int denominator;
+};
+
+int main()
+{
+	{
+		const Rational r(3, 10);
+		if (r.Numerator() != 3 || r.Denominator() != 10)
+		{
+			cout << "Rational(3, 10) != 3/10" << endl;
+			return 1;
+		}
+	}
+
+	{
+		const Rational r(8, 12);
+		if (r.Numerator() != 2 || r.Denominator() != 3)
+		{
+			cout << "Rational(8, 12) != 2/3" << endl;
+			return 2;
+		}
+	}
+
+	{
+		const Rational r(-4, 6);
+		if (r.Numerator() != -2 || r.Denominator() != 3)
+		{
+			cout << "Rational(-4, 6) != -2/3" << endl;
+			return 3;
+		}
+	}
+
+	{
+		const Rational r(4, -6);
+		if (r.Numerator() != -2 || r.Denominator() != 3)
+		{
+			cout << "Rational(4, -6) != -2/3" << endl;
+			return 3;
+		}
+	}
+
+	{
+		const Rational r(0, 15);
+		if (r.Numerator() != 0 || r.Denominator() != 1)
+		{
+			cout << "Rational(0, 15) != 0/1" << endl;
+			return 4;
+		}
+	}
+
+	{
+		const Rational defaultConstructed;
+		if (defaultConstructed.Numerator() != 0 || defaultConstructed.Denominator() != 1)
+		{
+			cout << "Rational() != 0/1" << endl;
+			return 5;
+		}
+	}
+
+	cout << "OK" << endl;
+	return 0;
 }
