@@ -1,5 +1,6 @@
 //#include "pch.h"
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -79,29 +80,78 @@ Rational operator/(const Rational& lhs, const Rational& rhs)
 	return { lhs.Numerator() * rhs.Denominator(), lhs.Denominator() * rhs.Numerator() };
 };
 
+ostream& operator<<(ostream& stream, const Rational& value)
+{
+	stream << value.Numerator() << "/" << value.Denominator();
+	return stream;
+}
+
+istream& operator>>(istream& stream, Rational& value)
+{
+	int numerator = 0;
+	int denumerator = -1;
+	if (!stream)
+	{
+		return stream;
+	}
+
+	stream >> numerator;
+	stream.ignore(1);
+
+	if (!stream)
+	{
+		return stream;
+	}
+
+	stream >> denumerator;
+
+	value = Rational(numerator, denumerator);
+
+	return stream;
+}
+
 int main()
 {
 	{
-		Rational a(2, 3);
-		Rational b(4, 3);
-		Rational c = a * b;
-		bool equal = c == Rational(8, 9);
-		if (!equal)
+		ostringstream output;
+		output << Rational(-6, 8);
+		if (output.str() != "-3/4")
 		{
-			cout << "2/3 * 4/3 != 8/9" << endl;
+			cout << "Rational(-6, 8) should be written as \"-3/4\"" << endl;
 			return 1;
 		}
 	}
 
 	{
-		Rational a(5, 4);
-		Rational b(15, 8);
-		Rational c = a / b;
-		bool equal = c == Rational(2, 3);
+		istringstream input("5/7");
+		Rational r;
+		input >> r;
+		bool equal = r == Rational(5, 7);
 		if (!equal)
 		{
-			cout << "5/4 / 15/8 != 2/3" << endl;
+			cout << "5/7 is incorrectly read as " << r << endl;
 			return 2;
+		}
+	}
+
+	{
+		istringstream input("5/7 10/8");
+		Rational r1, r2;
+		input >> r1 >> r2;
+		bool correct = r1 == Rational(5, 7) && r2 == Rational(5, 4);
+		if (!correct)
+		{
+			cout << "Multiple values are read incorrectly: " << r1 << " " << r2 << endl;
+			return 3;
+		}
+
+		input >> r1;
+		input >> r2;
+		correct = r1 == Rational(5, 7) && r2 == Rational(5, 4);
+		if (!correct)
+		{
+			cout << "Read from empty stream shouldn't change arguments: " << r1 << " " << r2 << endl;
+			return 4;
 		}
 	}
 
