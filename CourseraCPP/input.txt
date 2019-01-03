@@ -1,3 +1,8 @@
-2 3
-10,200,3
-4,5,6
+3
+Ivan Ivanov 1 1 1901
+Petr Petrov 2 2 1902
+Alexandr Sidorov 3 3 1903
+3
+name name
+date 3
+mark 5
