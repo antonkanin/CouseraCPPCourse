@@ -61,16 +61,18 @@ private:
 
 bool operator<(const Date& lhs, const Date& rhs)
 {
-	return (lhs.GetYear() < rhs.GetYear()) &&
-		(lhs.GetMonth() < rhs.GetMonth()) &&
-		(lhs.GetDay() < rhs.GetDay());
+	return 
+		(lhs.GetYear() < rhs.GetYear()) ||
+		(lhs.GetYear() == rhs.GetYear() &&	lhs.GetMonth() < rhs.GetMonth()) ||
+		(lhs.GetYear() == rhs.GetYear() && lhs.GetMonth() == rhs.GetMonth() && lhs.GetDay() < rhs.GetDay());
 }
 
 ostream& operator<<(ostream& stream, const Date& date)
 {
 	stream <<
 		setw(4) << setfill('0') << date.GetYear() << "-" <<
-		date.GetMonth() << "-" << date.GetDay();
+		setw(2) << setfill('0') << date.GetMonth() << "-" << 
+		setw(2) << setfill('0') << date.GetDay();
 
 	return stream;
 }
@@ -145,7 +147,7 @@ private:
 	map<Date, set<string>> database;
 };
 
-Date TryParseDate(string date)
+Date TryParseDate(const string& date)
 {
 	if (date.size() == 0)
 	{
@@ -173,11 +175,6 @@ Date TryParseDate(string date)
 		throw runtime_error("Wrong date format: " + date);
 	}
 
-	if (month < 1 || month > 12)
-	{
-		throw runtime_error("Month value is invalid: " + to_string(month));
-	}
-
 	ss.ignore(1);
 
 	int day;
@@ -186,9 +183,14 @@ Date TryParseDate(string date)
 		throw runtime_error("Wrong date format: " + date);
 	}
 
+	if (month < 1 || month > 12)
+	{
+		throw runtime_error("Month value is invalid: " + to_string(month));
+	}
+
 	if (day < 1 || day > 31)
 	{
-		throw runtime_error("Day value is invalid : " + to_string(day));
+		throw runtime_error("Day value is invalid: " + to_string(day));
 	}
 
 
@@ -242,16 +244,35 @@ void DoWork(istream& inputStream)
 		{
 			db.Print();
 		}
+		else
+		{
+			throw runtime_error("Unknown command: " + command);
+		}
 	}
 }
 
 int main()
 {
+	//ifstream inputFile("input.txt");
+	//string line;
+	//while (getline(inputFile, line))
+	//{
+	//	try
+	//	{
+	//		stringstream ss(line);
+	//		DoWork(ss);
+	//	}
+	//	catch (runtime_error ex)
+	//	{
+	//		cout << ex.what() << endl;
+	//	}
+	//}
+
 	try
 	{
-		ifstream inputFile("input.txt");
-		DoWork(inputFile);
-		//DoWork(cin);
+		//ifstream inputFile("input.txt");
+		//DoWork(inputFile);
+		DoWork(cin);
 	}
 	catch (runtime_error ex)
 	{
