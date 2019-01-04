@@ -1,45 +1,262 @@
-//#include "pch.h"
-#include <iostream>
-#include <exception>
+﻿#include "pch.h"
 #include <string>
+#include <iostream>
+#include <map>
+#include <vector>
+#include <set>
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+
 using namespace std;
 
-string AskTimeServer()
+struct Year
 {
-	throw exception();
-}
+	explicit Year(int year) : value(year)
+	{}
+	int value;
+};
 
-class TimeServer
+struct Month
+{
+	explicit Month(int month) : value(month)
+	{}
+	int value;
+};
+
+struct Day
+{
+	explicit Day(int day) : value(day)
+	{}
+	int value;
+};
+
+class Date
 {
 public:
-	string GetCurrentTime()
+	Date(Year year, Month month, Day day) : year(year), month(month), day(day)
+	{}
+
+	int GetYear() const
 	{
-		try
+		return year.value;
+	}
+
+	int GetMonth() const
+	{
+		return month.value;
+	}
+
+	int GetDay() const
+	{
+		return day.value;
+	}
+
+private:
+	Year year;
+	Month month;
+	Day day;
+};
+
+
+bool operator<(const Date& lhs, const Date& rhs)
+{
+	return (lhs.GetYear() < rhs.GetYear()) &&
+		(lhs.GetMonth() < rhs.GetMonth()) &&
+		(lhs.GetDay() < rhs.GetDay());
+}
+
+ostream& operator<<(ostream& stream, const Date& date)
+{
+	stream <<
+		setw(4) << setfill('0') << date.GetYear() << "-" <<
+		date.GetMonth() << "-" << date.GetDay();
+
+	return stream;
+}
+
+class Database
+{
+public:
+	void AddEvent(const Date& date, const string& event)
+	{
+		if (database.count(date) > 0)
 		{
-			const string result = AskTimeServer();
-			LastFetchedTime = result;
-			return LastFetchedTime;
+			database.at(date).insert(event);
 		}
-		catch (system_error ex)
+		else
 		{
-			return LastFetchedTime;
+			database[date] = { event };
+		}
+	}
+
+	bool DeleteEvent(const Date& date, const string& event)
+	{
+		if (database.count(date) > 0 && database.at(date).count(event) > 0)
+		{
+			database[date].erase(event);
+			cout << "Deleted successfully" << endl;
+			return true;
+		}
+		cout << "Event not found" << endl;
+		return false;
+	}
+
+	int DeleteDate(const Date& date)
+	{
+		const int count = database.count(date);
+
+		if (count > 0)
+		{
+			cout << "Deleted " + to_string(database.at(date).size()) + " events" << endl;
+			database.erase(date);
+		}
+		else
+		{
+			cout << "Deleted 0 events" << endl;
+		}
+
+		return count;
+	}
+
+	void Find(const Date& date) const
+	{
+		if (database.count(date) > 0)
+		{
+			for (const auto& item : database.at(date))
+			{
+				cout << item << endl;
+			}
+		}
+	}
+
+	void Print() const
+	{
+		for (const auto& date : database)
+		{
+			for (const auto& event : date.second)
+			{
+				cout << date.first << " " << event << endl;
+			}
 		}
 	}
 
 private:
-	string LastFetchedTime = "00:00:00";
+	map<Date, set<string>> database;
 };
+
+Date TryParseDate(string date)
+{
+	if (date.size() == 0)
+	{
+		throw runtime_error("Wrong date format: " + date);
+	}
+
+	stringstream ss(date);
+
+	int year;
+	if ((ss >> year).fail())
+	{
+		throw runtime_error("Wrong date format: " + date);
+	}
+
+	if (ss.peek() != '-')
+	{
+		throw runtime_error("Wrong date format: " + date);
+	}
+
+	ss.ignore(1);
+
+	int month;
+	if ((ss >> month).fail())
+	{
+		throw runtime_error("Wrong date format: " + date);
+	}
+
+	if (month < 1 || month > 12)
+	{
+		throw runtime_error("Month value is invalid: " + to_string(month));
+	}
+
+	ss.ignore(1);
+
+	int day;
+	if ((ss >> day).fail())
+	{
+		throw runtime_error("Wrong date format: " + date);
+	}
+
+	if (day < 1 || day > 31)
+	{
+		throw runtime_error("Day value is invalid : " + to_string(day));
+	}
+
+
+	return { Year(year), Month(month), Day(day) };
+}
+
+void DoWork(istream& inputStream)
+{
+	Database db;
+
+	string inputLine;
+	while (getline(inputStream, inputLine))
+	{
+		if (inputLine == "")
+		{
+			continue;
+		}
+
+		stringstream commandStream(inputLine);
+		string command;
+		commandStream >> command;
+
+		if (command == "Add")
+		{
+			string date, event;
+			commandStream >> date >> event;
+			db.AddEvent(TryParseDate(date), event);
+		}
+		else if (command == "Del")
+		{
+			string date;
+			commandStream >> date;
+			if (commandStream.eof())
+			{
+				db.DeleteDate(TryParseDate(date));
+			}
+			else
+			{
+				string event;
+				commandStream >> event;
+				db.DeleteEvent(TryParseDate(date), event);
+			}
+		}
+		else if (command == "Find")
+		{
+			string date;
+			commandStream >> date;
+			db.Find(TryParseDate(date));
+		}
+		else if (command == "Print")
+		{
+			db.Print();
+		}
+	}
+}
 
 int main()
 {
-	TimeServer ts;
 	try
 	{
-		cout << ts.GetCurrentTime() << endl;
+		ifstream inputFile("input.txt");
+		DoWork(inputFile);
+		//DoWork(cin);
 	}
-	catch (exception& e)
+	catch (runtime_error ex)
 	{
-		cout << "Exception got: " << e.what() << endl;
+		cout << ex.what() << endl;
 	}
+
 	return 0;
 }

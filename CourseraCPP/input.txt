@@ -1,8 +1,14 @@
-3
-Ivan Ivanov 1 1 1901
-Petr Petrov 2 2 1902
-Alexandr Sidorov 3 3 1903
-3
-name name
-date 3
-mark 5
+Add 0-1-2 event1
+
+Add 1-2-3 event2
+
+Find 0-1-2
+
+
+Del 0-1-2
+
+Print
+
+Del 1-2-3 event2
+
+Del 1-2-3 event2
