@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+﻿//#include "pch.h"
 #include <string>
 #include <iostream>
 #include <map>
@@ -170,7 +170,7 @@ Date TryParseDate(const string& date)
 	ss.ignore(1);
 
 	int month;
-	if ((ss >> month).fail())
+	if ((ss >> month).fail() || ss.peek() != '-')
 	{
 		throw runtime_error("Wrong date format: " + date);
 	}
@@ -178,7 +178,8 @@ Date TryParseDate(const string& date)
 	ss.ignore(1);
 
 	int day;
-	if ((ss >> day).fail())
+	
+	if ((ss >> day).fail() || !ss.eof())
 	{
 		throw runtime_error("Wrong date format: " + date);
 	}
