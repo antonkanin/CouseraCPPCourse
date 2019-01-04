@@ -1,7 +1,6 @@
 //#include "pch.h"
 #include <iostream>
 #include <sstream>
-#include <set>
 #include <vector>
 #include <map>
 
@@ -17,20 +16,25 @@ class Rational
 public:
 	Rational()
 	{
-		numberator = 0;
+		numerator = 0;
 		denominator = 1;
 	}
 
 	Rational(int numerator, int denominator)
 	{
+		if (denominator == 0)
+		{
+			throw invalid_argument("Denominator is 0");
+		}
+
 		if (denominator < 0)
 		{
 			denominator = abs(denominator);
 			numerator = -1 * numerator;
 		}
 
-		int gcd = getGCD(abs(numerator), abs(denominator));
-		this->numberator = numerator / gcd;
+		const int gcd = getGCD(abs(numerator), abs(denominator));
+		this->numerator = numerator / gcd;
 
 		if (numerator == 0)
 		{
@@ -44,7 +48,7 @@ public:
 
 	int Numerator() const
 	{
-		return numberator;
+		return numerator;
 	}
 
 	int Denominator() const
@@ -53,7 +57,7 @@ public:
 	}
 
 private:
-	int numberator;
+	int numerator;
 	int denominator;
 };
 
@@ -80,6 +84,11 @@ Rational operator*(const Rational& lhs, const Rational& rhs)
 
 Rational operator/(const Rational& lhs, const Rational& rhs)
 {
+	if (rhs.Numerator() == 0)
+	{
+		throw domain_error("Denumerator is 0");
+	}
+
 	return { lhs.Numerator() * rhs.Denominator(), lhs.Denominator() * rhs.Numerator() };
 };
 
@@ -121,45 +130,45 @@ bool operator<(const Rational& lhs, const Rational& rhs)
 	return left < right;
 }
 
+void DoWork(istream& inputStream)
+{
+	Rational lhs, rhs;
+	char operation;
+
+	inputStream >> lhs >> operation >> rhs;
+
+	if (operation == '+')
+	{
+		cout << lhs + rhs;
+	}
+	else if (operation == '-')
+	{
+		cout << lhs - rhs;
+	}
+	else if (operation == '*')
+	{
+		cout << lhs * rhs;
+	}
+	else if (operation == '/')
+	{
+		cout << lhs / rhs;
+	}
+}
+
 int main()
 {
+	try
 	{
-		const set<Rational> rs = { {1, 2}, {1, 25}, {3, 4}, {3, 4}, {1, 2} };
-		if (rs.size() != 3)
-		{
-			cout << "Wrong amount of items in the set" << endl;
-			return 1;
-		}
-
-		vector<Rational> v;
-		for (auto x : rs)
-		{
-			v.push_back(x);
-		}
-		if (v != vector<Rational>{
-			{
-				1, 25
-			}, { 1, 2 }, { 3, 4 }})
-		{
-			cout << "Rationals comparison works incorrectly" << endl;
-			return 2;
-		}
+		DoWork(cin);
 	}
-
+	catch (invalid_argument ex)
 	{
-		map<Rational, int> count;
-		++count[{1, 2}];
-		++count[{1, 2}];
-
-		++count[{2, 3}];
-
-		if (count.size() != 2)
-		{
-			cout << "Wrong amount of items in the map" << endl;
-			return 3;
-		}
+		cout << "Invalid argument";
 	}
-
-	cout << "OK" << endl;
+	catch (domain_error ex)
+	{
+		cout << "Division by zero";
+	}
+	
 	return 0;
 }
