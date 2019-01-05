@@ -1,284 +1,161 @@
-﻿//#include "pch.h"
-#include <string>
+//#include "pch.h"
 #include <iostream>
-#include <map>
-#include <vector>
-#include <set>
-#include <sstream>
 #include <fstream>
-#include <iomanip>
+#include <stdexcept>
+#include <vector>
 
 using namespace std;
 
-struct Year
-{
-	explicit Year(int year) : value(year)
-	{}
-	int value;
-};
-
-struct Month
-{
-	explicit Month(int month) : value(month)
-	{}
-	int value;
-};
-
-struct Day
-{
-	explicit Day(int day) : value(day)
-	{}
-	int value;
-};
-
-class Date
+class Matrix
 {
 public:
-	Date(Year year, Month month, Day day) : year(year), month(month), day(day)
-	{}
+	Matrix()
+	{};
 
-	int GetYear() const
+	Matrix(int num_rows, int num_cols)
 	{
-		return year.value;
+		Reset(num_rows, num_cols);
 	}
 
-	int GetMonth() const
+	void Reset(int num_rows, int num_cols)
 	{
-		return month.value;
+		if (num_rows < 0 || num_cols < 0)
+		{
+			throw out_of_range("Index out of range");
+		}
+
+		rowCount = num_rows;
+		colCount = num_cols;
+
+		matrix.resize(num_rows);
+		for (auto& item : matrix)
+		{
+			item.assign(num_cols, 0);
+		}
 	}
 
-	int GetDay() const
+	int At(int row, int col) const
 	{
-		return day.value;
+		if (row < 0 || row >= GetNumRows() || col < 0 || col >= GetNumColumns())
+		{
+			throw out_of_range("Index out of range");
+		}
+
+		return matrix[row][col];
+	}
+
+	int& At(int row, int col)
+	{
+		if (row < 0 || row >= GetNumRows() || col < 0 || col >= GetNumColumns())
+		{
+			throw out_of_range("Index out of range");
+		}
+
+		return matrix[row][col];
+	}
+
+	int GetNumRows() const
+	{
+		return rowCount;
+	}
+
+	int GetNumColumns() const
+	{
+		return colCount;
 	}
 
 private:
-	Year year;
-	Month month;
-	Day day;
+	vector<vector<int>> matrix;
+
+	int rowCount = 0;
+	int colCount = 0;
 };
 
-
-bool operator<(const Date& lhs, const Date& rhs)
+istream& operator>>(istream& stream, Matrix& matrix)
 {
-	return 
-		(lhs.GetYear() < rhs.GetYear()) ||
-		(lhs.GetYear() == rhs.GetYear() &&	lhs.GetMonth() < rhs.GetMonth()) ||
-		(lhs.GetYear() == rhs.GetYear() && lhs.GetMonth() == rhs.GetMonth() && lhs.GetDay() < rhs.GetDay());
-}
+	int cols_num, rows_num;
+	stream >> rows_num >> cols_num;
 
-ostream& operator<<(ostream& stream, const Date& date)
-{
-	stream <<
-		setw(4) << setfill('0') << date.GetYear() << "-" <<
-		setw(2) << setfill('0') << date.GetMonth() << "-" << 
-		setw(2) << setfill('0') << date.GetDay();
+	matrix.Reset(rows_num, cols_num);
+
+	for (int row_id = 0; row_id < rows_num; ++row_id)
+	{
+		for (int col_id = 0; col_id < cols_num; ++col_id)
+		{
+			int num;
+			stream >> num;
+			matrix.At(row_id, col_id) = num;
+		}
+	}
 
 	return stream;
 }
 
-class Database
+ostream& operator<<(ostream& stream, const Matrix& matrix)
 {
-public:
-	void AddEvent(const Date& date, const string& event)
+	stream << matrix.GetNumRows() << " " << matrix.GetNumColumns() << endl;
+
+	for (int row_id = 0; row_id < matrix.GetNumRows(); ++row_id)
 	{
-		if (database.count(date) > 0)
+		for (int col_id = 0; col_id < matrix.GetNumColumns(); ++col_id)
 		{
-			database.at(date).insert(event);
+			stream << matrix.At(row_id, col_id) << " ";
 		}
-		else
+		stream << endl;
+	}
+
+	return stream;
+}
+
+Matrix operator+(const Matrix& lhs, const Matrix& rhs)
+{
+	if (lhs.GetNumRows() != rhs.GetNumRows() ||
+		lhs.GetNumColumns() != rhs.GetNumColumns())
+	{
+		throw invalid_argument("Matrix sizes do not match");
+	}
+
+	Matrix result(lhs.GetNumRows(), lhs.GetNumColumns());
+
+	for (int row_id = 0; row_id < lhs.GetNumRows(); ++row_id)
+	{
+		for (int col_id = 0; col_id < lhs.GetNumColumns(); ++col_id)
 		{
-			database[date] = { event };
+			result.At(row_id, col_id) = lhs.At(row_id, col_id) + rhs.At(row_id, col_id);
 		}
 	}
 
-	bool DeleteEvent(const Date& date, const string& event)
+	return result;
+}
+
+bool operator==(const Matrix& lhs, const Matrix& rhs)
+{
+	if (lhs.GetNumRows() != rhs.GetNumRows() ||
+		lhs.GetNumColumns() != rhs.GetNumColumns())
 	{
-		if (database.count(date) > 0 && database.at(date).count(event) > 0)
-		{
-			database[date].erase(event);
-			cout << "Deleted successfully" << endl;
-			return true;
-		}
-		cout << "Event not found" << endl;
 		return false;
 	}
 
-	int DeleteDate(const Date& date)
+	for (int row_id = 0; row_id < lhs.GetNumRows(); ++row_id)
 	{
-		const int count = database.count(date);
-
-		if (count > 0)
+		for (int col_id = 0; col_id < lhs.GetNumColumns(); ++col_id)
 		{
-			cout << "Deleted " + to_string(database.at(date).size()) + " events" << endl;
-			database.erase(date);
-		}
-		else
-		{
-			cout << "Deleted 0 events" << endl;
-		}
-
-		return count;
-	}
-
-	void Find(const Date& date) const
-	{
-		if (database.count(date) > 0)
-		{
-			for (const auto& item : database.at(date))
+			if (lhs.At(row_id, col_id) != rhs.At(row_id, col_id))
 			{
-				cout << item << endl;
+				return false;
 			}
 		}
 	}
 
-	void Print() const
-	{
-		for (const auto& date : database)
-		{
-			for (const auto& event : date.second)
-			{
-				cout << date.first << " " << event << endl;
-			}
-		}
-	}
-
-private:
-	map<Date, set<string>> database;
-};
-
-Date TryParseDate(const string& date)
-{
-	if (date.size() == 0)
-	{
-		throw runtime_error("Wrong date format: " + date);
-	}
-
-	stringstream ss(date);
-
-	int year;
-	if ((ss >> year).fail())
-	{
-		throw runtime_error("Wrong date format: " + date);
-	}
-
-	if (ss.peek() != '-')
-	{
-		throw runtime_error("Wrong date format: " + date);
-	}
-
-	ss.ignore(1);
-
-	int month;
-	if ((ss >> month).fail() || ss.peek() != '-')
-	{
-		throw runtime_error("Wrong date format: " + date);
-	}
-
-	ss.ignore(1);
-
-	int day;
-	
-	if ((ss >> day).fail() || !ss.eof())
-	{
-		throw runtime_error("Wrong date format: " + date);
-	}
-
-	if (month < 1 || month > 12)
-	{
-		throw runtime_error("Month value is invalid: " + to_string(month));
-	}
-
-	if (day < 1 || day > 31)
-	{
-		throw runtime_error("Day value is invalid: " + to_string(day));
-	}
-
-
-	return { Year(year), Month(month), Day(day) };
-}
-
-void DoWork(istream& inputStream)
-{
-	Database db;
-
-	string inputLine;
-	while (getline(inputStream, inputLine))
-	{
-		if (inputLine == "")
-		{
-			continue;
-		}
-
-		stringstream commandStream(inputLine);
-		string command;
-		commandStream >> command;
-
-		if (command == "Add")
-		{
-			string date, event;
-			commandStream >> date >> event;
-			db.AddEvent(TryParseDate(date), event);
-		}
-		else if (command == "Del")
-		{
-			string date;
-			commandStream >> date;
-			if (commandStream.eof())
-			{
-				db.DeleteDate(TryParseDate(date));
-			}
-			else
-			{
-				string event;
-				commandStream >> event;
-				db.DeleteEvent(TryParseDate(date), event);
-			}
-		}
-		else if (command == "Find")
-		{
-			string date;
-			commandStream >> date;
-			db.Find(TryParseDate(date));
-		}
-		else if (command == "Print")
-		{
-			db.Print();
-		}
-		else
-		{
-			throw runtime_error("Unknown command: " + command);
-		}
-	}
+	return true;
 }
 
 int main()
 {
-	//ifstream inputFile("input.txt");
-	//string line;
-	//while (getline(inputFile, line))
-	//{
-	//	try
-	//	{
-	//		stringstream ss(line);
-	//		DoWork(ss);
-	//	}
-	//	catch (runtime_error ex)
-	//	{
-	//		cout << ex.what() << endl;
-	//	}
-	//}
+	Matrix one(0, 1);
+	Matrix two(1, 0);
 
-	try
-	{
-		//ifstream inputFile("input.txt");
-		//DoWork(inputFile);
-		DoWork(cin);
-	}
-	catch (runtime_error ex)
-	{
-		cout << ex.what() << endl;
-	}
+	auto t = one + two;
 
 	return 0;
 }
