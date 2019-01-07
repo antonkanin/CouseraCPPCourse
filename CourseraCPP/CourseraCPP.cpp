@@ -1,4 +1,4 @@
-#include "pch.h"
+//#include "pch.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -91,37 +91,45 @@ ostream& operator << (ostream& os, const BusesForStopResponse& r)
 
 struct StopsForBusResponse
 {
-	map<string, vector<string>> stops_for_buses;
+	vector<string> stops;
+	vector<vector<string>> buses;
 };
 
 ostream& operator << (ostream& os, const StopsForBusResponse& r)
 {
-	if (r.stops_for_buses.empty())
+	if (r.stops.empty())
 	{
 		cout << "No bus";
 	}
 	else
 	{
-		for (const auto& stop : r.stops_for_buses)
+		size_t counter = 0;
+		for (size_t index = 0; index < r.stops.size(); ++index)
+		// for (const auto& stop : r.stops_for_buses)
 		{
-			os << "Stop " << stop.first << ": ";
-			if (stop.second.empty())
+			os << "Stop " << r.stops[index] << ": ";
+			if (r.buses[index].empty())
 			{
 				os << "no interchange";
 			}
 			else
 			{
-				for (const auto& bus : stop.second)
+				for (const auto& bus : r.buses[index])
 				{
 					os << bus << " ";
 				}
 			}
-			os << endl;
+
+			if (counter < r.stops.size() - 1)
+			{
+				os << endl;
+			}
+
+			counter++;
 		}
 	}
 	return os;
 }
-
 
 struct AllBusesResponse
 {
@@ -136,6 +144,7 @@ ostream& operator << (ostream& os, const AllBusesResponse& r)
 	}
 	else
 	{
+		size_t counter = 0;
 		for (const auto& bus : r.buses_to_stops)
 		{
 			os << "Bus " << bus.first << ":";
@@ -143,7 +152,13 @@ ostream& operator << (ostream& os, const AllBusesResponse& r)
 			{
 				os << " " << stop;
 			}
-			os << endl;
+
+			if (counter < r.buses_to_stops.size() - 1)
+			{
+				os << endl;
+			}
+
+			++counter;
 		}
 	}
 	return os;
@@ -178,35 +193,39 @@ public:
 
 	StopsForBusResponse GetStopsForBus(const string& bus) const
 	{
-		map<string, vector<string>> result;
+		vector<string> stops;
+		vector<vector<string>> buses;
 
 		// if there are no records for this bus return empty map
 		if (buses_to_stops.count(bus) == 0)
 		{
-			return {};
+			return {{}, {}};
 		}
 
 		// iterate through each stop for this bus
-		for (auto& stop : buses_to_stops.at(bus))
+		for (const auto& stop : buses_to_stops.at(bus))
 		{
+			stops.push_back(stop);
+
 			// if there is just one bus for a given stop its our input bus and we can skip it
 			if (stops_to_buses.at(stop).size() == 1)
 			{
-				result[stop] = {};
+				buses.push_back({});
 			}
 			else
 			{
+				buses.push_back({});
 				for (const auto& other_bus : stops_to_buses.at(stop))
 				{
 					if (bus != other_bus)
 					{
-						result[stop].push_back(other_bus);
+						buses[buses.size() - 1].push_back(other_bus);
 					}
 				}
 			}
 		}
 
-		return { result };
+		return { stops, buses };
 	}
 
 	AllBusesResponse GetAllBuses() const
@@ -216,7 +235,7 @@ public:
 
 private:
 	map<string, vector<string>> buses_to_stops;
-	unordered_map<string, vector<string>> stops_to_buses;
+	map<string, vector<string>> stops_to_buses;
 };
 
 void DoWork(istream& inStream)
