@@ -5,146 +5,62 @@
 
 using namespace std;
 
-//enum class TaskStatus
-//{
-//	NEW,
-//	IN_PROGRESS,
-//	TESTING,
-//	DONE
-//};
-//
-//using TasksInfo = map<TaskStatus, int>;
+template<typename T> T Sqr(T value);
+template<typename T> vector<T> Sqr(vector<T> value);
+template<typename T1, typename T2> pair<T1, T2> Sqr(pair<T1, T2> p);
+template<typename Key, typename Value> map<Key, Value> Sqr(map<Key, Value> m);
 
-TaskStatus GetNextStatus(const TaskStatus& status)
+template<typename T>
+T Sqr(T value)
 {
-	switch (status)
-	{
-		case TaskStatus::NEW:
-			return TaskStatus::IN_PROGRESS;
-			break;
-		case TaskStatus::IN_PROGRESS:
-			return TaskStatus::TESTING;
-			break;
-		case TaskStatus::TESTING:
-			return TaskStatus::DONE;
-			break;
-		default:
-			return status;
-	}
+	return value * value;
 }
 
-class TeamTasks
+template<typename T>
+vector<T> Sqr(vector<T> value)
 {
-public:
-	const TasksInfo& GetPersonTasksInfo(const string& person) const
+	for (auto& item : value)
 	{
-		return personsTasks.at(person);
+		item = Sqr(item);
 	}
+	return value;
+}
 
-	void AddNewTask(const string& person)
-	{
-		if (person.empty())
-		{
-			return;
-		}
-
-		personsTasks[person][TaskStatus::NEW]++;
-	}
-
-	tuple<TasksInfo, TasksInfo> PerformPersonTasks(
-		const string& person, int task_count)
-	{
-		if (personsTasks.count(person) == 0)
-		{
-			return { {}, {} };
-		}
-
-		TasksInfo allTasks = personsTasks.at(person);
-		TasksInfo updatedTasks;
-		TasksInfo oldTasks;
-
-		for (const auto& status : personsTasks.at(person))
-		{
-			if (status.first == TaskStatus::DONE)
-			{
-				break;
-			}
-
-			if (task_count > status.second)
-			{
-				allTasks[status.first] -= status.second;
-				allTasks[GetNextStatus(status.first)] += status.second;
-
-				updatedTasks[GetNextStatus(status.first)] += status.second;
-
-				task_count -= status.second;
-			}
-			else
-			{
-				allTasks[status.first] -= task_count;
-				allTasks[GetNextStatus(status.first)] += task_count;
-
-				updatedTasks[GetNextStatus(status.first)] += task_count;
-
-				if (task_count < status.second)
-				{
-					oldTasks[status.first] = status.second - task_count;
-				}
-
-				auto remainingStatus = GetNextStatus(status.first);
-
-				while (remainingStatus != TaskStatus::DONE && personsTasks.at(person).count(remainingStatus) > 0)
-				{
-					oldTasks[remainingStatus] = personsTasks.at(person).at(remainingStatus);
-					remainingStatus = GetNextStatus(remainingStatus);
-				}
-
-				break;
-			}
-		}
-
-		personsTasks[person] = allTasks;
-
-		return make_tuple(updatedTasks, oldTasks);
-	}
-
-private:
-	map<string, TasksInfo> personsTasks;
-};
-
-void PrintTasksInfo(TasksInfo tasks_info)
+template<typename T1, typename T2>
+pair<T1, T2> Sqr(pair<T1, T2> p)
 {
-	//cout << tasks_info[TaskStatus::NEW] << " new tasks" <<
-	//	", " << tasks_info[TaskStatus::IN_PROGRESS] << " tasks in progress" <<
-	//	", " << tasks_info[TaskStatus::TESTING] << " tasks are being tested" <<
-	//	", " << tasks_info[TaskStatus::DONE] << " tasks are done" << endl;
+	return { Sqr(p.first), Sqr(p.second) };
+}
 
-	cout << tasks_info[TaskStatus::NEW] << " " <<
-	tasks_info[TaskStatus::IN_PROGRESS] << " " <<
-	tasks_info[TaskStatus::TESTING] << " " <<
-	tasks_info[TaskStatus::DONE] << endl;
+template<typename Key, typename Value> 
+map<Key, Value> Sqr(map<Key, Value> m)
+{
+	for (auto& item : m)
+	{
+		item.second = Sqr(item.second);
+	}
+	return m;
 }
 
 int main()
 {
-	TeamTasks tasks;
-
-	for (int i = 0; i < 3; ++i)
+	vector<int> v = { 1, 2, 3 };
+	cout << "vector:";
+	for (int x : Sqr(v))
 	{
-		tasks.AddNewTask("Ivan");
+		cout << ' ' << x;
 	}
+	cout << endl;
 
-	TasksInfo updated_tasks, untouched_tasks;
+	map<int, pair<int, int>> map_of_pairs = {
+	  {4, {2, 2}},
+	  {7, {4, 3}}
+	};
 
-	for (int i = 0; i < 10; i++)
+	cout << "map of pairs:" << endl;
+	for (const auto& x : Sqr(map_of_pairs))
 	{
-		tie(updated_tasks, untouched_tasks) = tasks.PerformPersonTasks("Ivan", 2);
-
-		PrintTasksInfo(tasks.GetPersonTasksInfo("Ivan"));
-		PrintTasksInfo(updated_tasks);
-		PrintTasksInfo(untouched_tasks);
-
-		cout << endl;
+		cout << x.first << ' ' << x.second.first << ' ' << x.second.second << endl;
 	}
 
 	return 0;
