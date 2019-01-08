@@ -116,83 +116,119 @@ private:
 	int fail_count = 0;
 };
 
-double FindDiscriminant(double a, double b, double c)
+//string FindNameByYear(const map<int, string>& names, int year)
+//{
+//	string name;
+//
+//	for (const auto& item : names)
+//	{
+//		if (item.first <= year)
+//		{
+//			name = item.second;
+//		}
+//		else
+//		{
+//			break;
+//		}
+//	}
+//
+//	return name;
+//}
+//
+
+//class Person
+//{
+//public:
+//	void ChangeFirstName(int year, const string& first_name)
+//	{
+//		first_names[year] = first_name;
+//	}
+//	void ChangeLastName(int year, const string& last_name)
+//	{
+//		last_names[year] = last_name;
+//	}
+//
+//	string GetFullName(int year)
+//	{
+//		const string first_name = FindNameByYear(first_names, year);
+//		const string last_name = FindNameByYear(last_names, year);
+//
+//		if (first_name.empty() && last_name.empty())
+//		{
+//			return "Incognito";
+//		}
+//		else if (first_name.empty())
+//		{
+//			return last_name + " with unknown first name";
+//		}
+//		else if (last_name.empty())
+//		{
+//			return first_name + " with unknown last name";
+//		}
+//		else
+//		{
+//			return first_name + " " + last_name;
+//		}
+//	}
+//private:
+//		map<int, string> first_names;
+//		map<int, string> last_names;
+//};
+
+void TestIncognito()
 {
-	return b * b - 4 * a * c;
+	Person p{};
+	Assert(p.GetFullName(0) == "Incognito", "Testing incognito");
 }
 
-int GetDistinctRealRootCount(double A, double B, double C)
+void TestNoLastName()
 {
-	// find D
-	double D = FindDiscriminant(A, B, C);
+	Person p{};
+	p.ChangeFirstName(0, "firstname_1");
+	Assert(p.GetFullName(1) == "firstname_1 with unknown last name", "Testing firstname_1 with no last name");
 
-	// if D == 0 then it's a linear equation: Bx + C = 0
-	if (A == 0)
-	{
-		if (B != 0)
-		{
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	if (D == 0) // there is just one root
-	{  
-		return 1;
-	}
-
-	if (D > 0) // two roots
-	{  
-		return 2;
-	}
-
-	// D < 0
-	return 0;
+	p.ChangeFirstName(1, "firstname_2");
+	Assert(p.GetFullName(2) == "firstname_2 with unknown last name", "Testing firstname_2 with no last name");
 }
 
-// D < 0, 0 roots
-void TestRootsCount_Dl0()
+void TestNoFirstNameName()
 {
-	Assert(GetDistinctRealRootCount(1, 1, 1) == 0, "A 1 / B 1 / C 1 - 0 root, D < 0");
+	Person p{};
+	
+	p.ChangeLastName(0, "lastname_1");
+	Assert(p.GetFullName(1) == "lastname_1 with unknown first name", "Testing no first name");
+
+	p.ChangeLastName(1, "lastname_2");
+	Assert(p.GetFullName(2) == "lastname_2 with unknown first name", "Testing no first name");
 }
 
-// A == 0, B != 0
-void TestRootsCount_A0_Bn0()
+void TestWithFirstAndLastName()
 {
-	Assert(GetDistinctRealRootCount(0, 1, 1) == 1, "A 0 / B 1 / C 1 - 1 root");
-}
+	Person p{};
 
-// A == 0, B == 0
-void TestRootsCount_A0B0()
-{
-	Assert(GetDistinctRealRootCount(0, 0, 1) == 0, "A 0 / B 0 / C 1 - 0 root");
-}
+	p.ChangeFirstName(1, "firstname_1");
+	p.ChangeLastName(1, "lastname_1");
 
-// D == 0
-void TestRootsCount_D0()
-{
-	Assert(GetDistinctRealRootCount(1, 2, 1) == 1, "A 1 / B 2 / C 1 - 1 root");
-}
+	Assert(p.GetFullName(0) == "Incognito", "Testing incognito");
+	Assert(p.GetFullName(1) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 1");
+	Assert(p.GetFullName(2) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 2");
+	
 
-// D > 0, A != 0
-void TestRootsCount_D0Am0()
-{
-	Assert(GetDistinctRealRootCount(3, -5, 1) == 2, "A 3 / B -5 / C 1 - 2 root");
+	p.ChangeFirstName(0, "firstname_0");
+	p.ChangeLastName(0, "lastname_0");
+
+	Assert(p.GetFullName(0) == "firstname_0 lastname_0", "Correct firstname_1 lastname_1 in the year 1");
+	Assert(p.GetFullName(1) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 1");
+	Assert(p.GetFullName(2) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 2");
 }
 
 int main()
 {
 	TestRunner runner;
-	runner.RunTest(TestRootsCount_Dl0, "TestRootsCount_Dl0");
-	runner.RunTest(TestRootsCount_A0_Bn0, "TestRootsCount_A0_Bn0");
-	runner.RunTest(TestRootsCount_A0B0, "TestRootsCount_A0B0");
-	runner.RunTest(TestRootsCount_D0, "TestRootsCount_D0");
-	runner.RunTest(TestRootsCount_D0Am0, "TestRootsCount_D0Am0");
-
-	// adding your own tests
-
+	runner.RunTest(TestIncognito, "TestIncognito");
+	runner.RunTest(TestNoLastName, "TestNoLastName");
+	runner.RunTest(TestNoFirstNameName, "TestNoFirstNameName");
+	runner.RunTest(TestWithFirstAndLastName, "TestWithFirstAndLastName");
+	
 	return 0;
 }
