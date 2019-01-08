@@ -116,119 +116,108 @@ private:
 	int fail_count = 0;
 };
 
-//string FindNameByYear(const map<int, string>& names, int year)
+//int GreatestCommonDivisor(int a, int b)
 //{
-//	string name;
-//
-//	for (const auto& item : names)
+//	if (b == 0)
 //	{
-//		if (item.first <= year)
-//		{
-//			name = item.second;
-//		}
-//		else
-//		{
-//			break;
-//		}
+//		return a;
 //	}
-//
-//	return name;
+//	else
+//	{
+//		return GreatestCommonDivisor(b, a % b);
+//	}
 //}
 //
-
-//class Person
+//class Rational
 //{
 //public:
-//	void ChangeFirstName(int year, const string& first_name)
-//	{
-//		first_names[year] = first_name;
-//	}
-//	void ChangeLastName(int year, const string& last_name)
-//	{
-//		last_names[year] = last_name;
+//	Rational()
+//	{  
+//		numerator = 0;
+//		denominator = 1;
 //	}
 //
-//	string GetFullName(int year)
+//	Rational(int new_numerator, int new_denominator)
 //	{
-//		const string first_name = FindNameByYear(first_names, year);
-//		const string last_name = FindNameByYear(last_names, year);
-//
-//		if (first_name.empty() && last_name.empty())
+//		const int gcd = GreatestCommonDivisor(new_numerator, new_denominator);
+//		numerator = new_numerator / gcd;
+//		denominator = new_denominator / gcd;
+//		
+//		if (denominator < 0)
 //		{
-//			return "Incognito";
-//		}
-//		else if (first_name.empty())
-//		{
-//			return last_name + " with unknown first name";
-//		}
-//		else if (last_name.empty())
-//		{
-//			return first_name + " with unknown last name";
-//		}
-//		else
-//		{
-//			return first_name + " " + last_name;
+//			denominator = -denominator;
+//			numerator = -numerator;
 //		}
 //	}
+//
+//	int Numerator() const
+//	{
+//		return numerator;
+//	}
+//
+//	int Denominator() const
+//	{
+//		return denominator;
+//	}
+//
 //private:
-//		map<int, string> first_names;
-//		map<int, string> last_names;
+//	int numerator;
+//	int denominator;
 //};
 
-void TestIncognito()
+void TestEmptyCtor()
 {
-	Person p{};
-	Assert(p.GetFullName(0) == "Incognito", "Testing incognito");
+	Rational r;
+	Assert(r.Numerator() == 0, "Empty rational numerator is 0");
+	Assert(r.Denominator() == 1, "Empty rational numerator is 1");
 }
 
-void TestNoLastName()
+void TestFractionReduction()
 {
-	Person p{};
-	p.ChangeFirstName(0, "firstname_1");
-	Assert(p.GetFullName(1) == "firstname_1 with unknown last name", "Testing firstname_1 with no last name");
+	Rational r1(2, 2);
+	Assert(r1.Numerator() == 1, "2/2 numerator is 1");
+	Assert(r1.Denominator() == 1, "2/2 denominator is 1");
 
-	p.ChangeFirstName(1, "firstname_2");
-	Assert(p.GetFullName(2) == "firstname_2 with unknown last name", "Testing firstname_2 with no last name");
+	Rational r2(8, 8);
+	Assert(r2.Numerator() == 1, "8/8 numerator is 1");
+	Assert(r2.Denominator() == 1, "8/8 denominator is 1");
+
+	Rational r3(2, 4);
+	Assert(r3.Numerator() == 1, "2/4 numerator is 1");
+	Assert(r3.Denominator() == 2, "2/4 denominator is 2");
 }
 
-void TestNoFirstNameName()
+void TestNegative()
 {
-	Person p{};
-	
-	p.ChangeLastName(0, "lastname_1");
-	Assert(p.GetFullName(1) == "lastname_1 with unknown first name", "Testing no first name");
+	Rational r1(-1, 1);
+	Assert(r1.Numerator() == -1, "-1/1 numerator is -1");
+	Assert(r1.Denominator() == 1, "-1/1 denominator is 1");
 
-	p.ChangeLastName(1, "lastname_2");
-	Assert(p.GetFullName(2) == "lastname_2 with unknown first name", "Testing no first name");
+	Rational r2(1, -1);
+	Assert(r2.Numerator() == -1, "1/-1 numerator is -1");
+	Assert(r2.Denominator() == 1, "1/-1 denominator is 1");
+
+	Rational r3(-1, -1);
+	Assert(r3.Numerator() == 1, "-1/-1 numerator is 1");
+	Assert(r3.Denominator() == 1, "-1/-1 denominator is 1");
 }
 
-void TestWithFirstAndLastName()
+void TestZeroNumerator()
 {
-	Person p{};
-
-	p.ChangeFirstName(1, "firstname_1");
-	p.ChangeLastName(1, "lastname_1");
-
-	Assert(p.GetFullName(0) == "Incognito", "Testing incognito");
-	Assert(p.GetFullName(1) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 1");
-	Assert(p.GetFullName(2) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 2");
-	
-
-	p.ChangeFirstName(0, "firstname_0");
-	p.ChangeLastName(0, "lastname_0");
-
-	Assert(p.GetFullName(0) == "firstname_0 lastname_0", "Correct firstname_1 lastname_1 in the year 1");
-	Assert(p.GetFullName(1) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 1");
-	Assert(p.GetFullName(2) == "firstname_1 lastname_1", "Correct firstname_1 lastname_1 in the year 2");
+	Rational r1(0, 2);
+	Assert(r1.Numerator() == 0, "0/2 numerator is 0");
+	Assert(r1.Denominator() == 1, "0/2 denominator is 1");
 }
 
 int main()
 {
 	TestRunner runner;
-	runner.RunTest(TestIncognito, "TestIncognito");
-	runner.RunTest(TestNoLastName, "TestNoLastName");
-	runner.RunTest(TestNoFirstNameName, "TestNoFirstNameName");
-	runner.RunTest(TestWithFirstAndLastName, "TestWithFirstAndLastName");
+	runner.RunTest(TestEmptyCtor, "TestEmptyCtor");
+	runner.RunTest(TestFractionReduction, "TestFractionReduction");
+	runner.RunTest(TestNegative, "TestNegative");
+	runner.RunTest(TestZeroNumerator, "TestZeroNumerator");
+
+	// tests
 	
 	return 0;
 }
