@@ -1,276 +1,198 @@
 //#include "pch.h"
-#include <string>
 #include <iostream>
-#include <vector>
 #include <map>
-#include <fstream>
-#include <unordered_map>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-enum class QueryType
+template <class T>
+ostream& operator << (ostream& os, const vector<T>& s)
 {
-	NewBus,
-	BusesForStop,
-	StopsForBus,
-	AllBuses
-};
-
-struct Query
-{
-	QueryType type;
-	string bus;
-	string stop;
-	vector<string> stops;
-};
-
-istream& operator >> (istream& is, Query& q)
-{
-	string command;
-	is >> command;
-
-	if (command == "NEW_BUS")
+	os << "{";
+	bool first = true;
+	for (const auto& x : s)
 	{
-		q.type = QueryType::NewBus;
-		is >> q.bus;
-
-		int stop_count;
-		is >> stop_count;
-
-		q.stops.resize(0);
-
-		while (stop_count > 0)
+		if (!first)
 		{
-			string stop_name;
-			is >> stop_name;
-			q.stops.push_back(stop_name);
-			stop_count--;
+			os << ", ";
 		}
+		first = false;
+		os << x;
 	}
-	else if (command == "BUSES_FOR_STOP")
-	{
-		q.type = QueryType::BusesForStop;
-		string stop;
-		is >> q.stop;
-	}
-	else if (command == "STOPS_FOR_BUS")
-	{
-		q.type = QueryType::StopsForBus;
-		string bus;
-		is >> q.bus;
-	}
-	else if (command == "ALL_BUSES")
-	{
-		q.type = QueryType::AllBuses;
-	}
-
-	return is;
+	return os << "}";
 }
 
-struct BusesForStopResponse
+template <class T>
+ostream& operator << (ostream& os, const set<T>& s)
 {
-	vector<string> buses;
-};
-
-ostream& operator << (ostream& os, const BusesForStopResponse& r)
-{
-	if (r.buses.empty())
+	os << "{";
+	bool first = true;
+	for (const auto& x : s)
 	{
-		cout << "No stop";
-	}
-	else
-	{
-		for (const auto& bus : r.buses)
+		if (!first)
 		{
-			os << bus << " ";
+			os << ", ";
 		}
+		first = false;
+		os << x;
 	}
-
-	return os;
-};
-
-struct StopsForBusResponse
-{
-	vector<string> stops;
-	vector<vector<string>> buses;
-};
-
-ostream& operator << (ostream& os, const StopsForBusResponse& r)
-{
-	if (r.stops.empty())
-	{
-		cout << "No bus";
-	}
-	else
-	{
-		size_t counter = 0;
-		for (size_t index = 0; index < r.stops.size(); ++index)
-		// for (const auto& stop : r.stops_for_buses)
-		{
-			os << "Stop " << r.stops[index] << ": ";
-			if (r.buses[index].empty())
-			{
-				os << "no interchange";
-			}
-			else
-			{
-				for (const auto& bus : r.buses[index])
-				{
-					os << bus << " ";
-				}
-			}
-
-			if (counter < r.stops.size() - 1)
-			{
-				os << endl;
-			}
-
-			counter++;
-		}
-	}
-	return os;
+	return os << "}";
 }
 
-struct AllBusesResponse
+template <class K, class V>
+ostream& operator << (ostream& os, const map<K, V>& m)
 {
-	map<string, vector<string>> buses_to_stops;
-};
-
-ostream& operator << (ostream& os, const AllBusesResponse& r)
-{
-	if (r.buses_to_stops.size() == 0)
+	os << "{";
+	bool first = true;
+	for (const auto& kv : m)
 	{
-		os << "No buses";
-	}
-	else
-	{
-		size_t counter = 0;
-		for (const auto& bus : r.buses_to_stops)
+		if (!first)
 		{
-			os << "Bus " << bus.first << ":";
-			for (const auto& stop : r.buses_to_stops.at(bus.first))
-			{
-				os << " " << stop;
-			}
-
-			if (counter < r.buses_to_stops.size() - 1)
-			{
-				os << endl;
-			}
-
-			++counter;
+			os << ", ";
 		}
+		first = false;
+		os << kv.first << ": " << kv.second;
 	}
-	return os;
-};
+	return os << "}";
+}
 
-class BusManager
+template<class T, class U>
+void AssertEqual(const T& t, const U& u, const string& hint = {})
+{
+	if (t != u)
+	{
+		ostringstream os;
+		os << "Assertion failed: " << t << " != " << u;
+		if (!hint.empty())
+		{
+			os << " hint: " << hint;
+		}
+		throw runtime_error(os.str());
+	}
+}
+
+void Assert(bool b, const string& hint)
+{
+	AssertEqual(b, true, hint);
+}
+
+class TestRunner
 {
 public:
-	void AddBus(const string& bus, const vector<string>& stops)
+	template <class TestFunc>
+	void RunTest(TestFunc func, const string& test_name)
 	{
-		if (buses_to_stops.count(bus) > 0)
+		try
 		{
-			return;
+			func();
+			cerr << test_name << " OK" << endl;
 		}
-
-		for (const auto& stop : stops)
+		catch (exception& e)
 		{
-			buses_to_stops[bus].push_back(stop);
-			stops_to_buses[stop].push_back(bus);
+			++fail_count;
+			cerr << test_name << " fail: " << e.what() << endl;
+		}
+		catch (...)
+		{
+			++fail_count;
+			cerr << "Unknown exception caught" << endl;
 		}
 	}
 
-	BusesForStopResponse GetBusesForStop(const string& stop) const
+	~TestRunner()
 	{
-		if (stops_to_buses.count(stop) == 0)
+		if (fail_count > 0)
 		{
-			return {};
+			cerr << fail_count << " unit tests failed. Terminate" << endl;
+			exit(1);
 		}
-
-		return { stops_to_buses.at(stop) };
-	}
-
-	StopsForBusResponse GetStopsForBus(const string& bus) const
-	{
-		vector<string> stops;
-		vector<vector<string>> buses;
-
-		// if there are no records for this bus return empty map
-		if (buses_to_stops.count(bus) == 0)
-		{
-			return {{}, {}};
-		}
-
-		// iterate through each stop for this bus
-		for (const auto& stop : buses_to_stops.at(bus))
-		{
-			stops.push_back(stop);
-
-			// if there is just one bus for a given stop its our input bus and we can skip it
-			if (stops_to_buses.at(stop).size() == 1)
-			{
-				buses.push_back({});
-			}
-			else
-			{
-				buses.push_back({});
-				for (const auto& other_bus : stops_to_buses.at(stop))
-				{
-					if (bus != other_bus)
-					{
-						buses[buses.size() - 1].push_back(other_bus);
-					}
-				}
-			}
-		}
-
-		return { stops, buses };
-	}
-
-	AllBusesResponse GetAllBuses() const
-	{
-		return { buses_to_stops };
 	}
 
 private:
-	map<string, vector<string>> buses_to_stops;
-	map<string, vector<string>> stops_to_buses;
+	int fail_count = 0;
 };
 
-void DoWork(istream& inStream)
+double FindDiscriminant(double a, double b, double c)
 {
-	int query_count;
-	Query q;
+	return b * b - 4 * a * c;
+}
 
-	inStream >> query_count;
+int GetDistinctRealRootCount(double A, double B, double C)
+{
+	// find D
+	double D = FindDiscriminant(A, B, C);
 
-	BusManager bm;
-	for (int i = 0; i < query_count; ++i)
+	// if D == 0 then it's a linear equation: Bx + C = 0
+	if (A == 0)
 	{
-		inStream >> q;
-		switch (q.type)
+		if (B != 0)
 		{
-			case QueryType::NewBus:
-				bm.AddBus(q.bus, q.stops);
-				break;
-			case QueryType::BusesForStop:
-				cout << bm.GetBusesForStop(q.stop) << endl;
-				break;
-			case QueryType::StopsForBus:
-				cout << bm.GetStopsForBus(q.bus) << endl;
-				break;
-			case QueryType::AllBuses:
-				cout << bm.GetAllBuses() << endl;
-				break;
+			return 1;
+		}
+		else
+		{
+			return 0;
 		}
 	}
+
+	if (D == 0) // there is just one root
+	{  
+		return 1;
+	}
+
+	if (D > 0) // two roots
+	{  
+		return 2;
+	}
+
+	// D < 0
+	return 0;
+}
+
+// D < 0, 0 roots
+void TestRootsCount_Dl0()
+{
+	Assert(GetDistinctRealRootCount(1, 1, 1) == 0, "A 1 / B 1 / C 1 - 0 root, D < 0");
+}
+
+// A == 0, B != 0
+void TestRootsCount_A0_Bn0()
+{
+	Assert(GetDistinctRealRootCount(0, 1, 1) == 1, "A 0 / B 1 / C 1 - 1 root");
+}
+
+// A == 0, B == 0
+void TestRootsCount_A0B0()
+{
+	Assert(GetDistinctRealRootCount(0, 0, 1) == 0, "A 0 / B 0 / C 1 - 0 root");
+}
+
+// D == 0
+void TestRootsCount_D0()
+{
+	Assert(GetDistinctRealRootCount(1, 2, 1) == 1, "A 1 / B 2 / C 1 - 1 root");
+}
+
+// D > 0, A != 0
+void TestRootsCount_D0Am0()
+{
+	Assert(GetDistinctRealRootCount(3, -5, 1) == 2, "A 3 / B -5 / C 1 - 2 root");
 }
 
 int main()
 {
-	ifstream input("input.txt");
-	DoWork(input);
+	TestRunner runner;
+	runner.RunTest(TestRootsCount_Dl0, "TestRootsCount_Dl0");
+	runner.RunTest(TestRootsCount_A0_Bn0, "TestRootsCount_A0_Bn0");
+	runner.RunTest(TestRootsCount_A0B0, "TestRootsCount_A0B0");
+	runner.RunTest(TestRootsCount_D0, "TestRootsCount_D0");
+	runner.RunTest(TestRootsCount_D0Am0, "TestRootsCount_D0Am0");
+
+	// adding your own tests
 
 	return 0;
 }
