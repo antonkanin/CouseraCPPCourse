@@ -1,102 +1,92 @@
+//#pragma once
 //#include "pch.h"
-#include <iostream>
-#include <map>
 #include <sstream>
-#include <stdexcept>
 #include <string>
-
+#include <algorithm>
+#include "phone_number.h"
 
 using namespace std;
-template<class T, class U>
-void AssertEqual(const T& t, const U& u, const string& hint = {})
-{
-	if (t != u)
-	{
-		ostringstream os;
-		os << "Assertion failed: " << t << " != " << u;
-		if (!hint.empty())
-		{
-			os << " hint: " << hint;
-		}
-		throw runtime_error(os.str());
-	}
-}
 
-void Assert(bool b, const string& hint)
-{
-	AssertEqual(b, true, hint);
-}
-
-class TestRunner
-{
-public:
-	template <class TestFunc>
-	void RunTest(TestFunc func, const string& test_name)
-	{
-		try
-		{
-			func();
-			cerr << test_name << " OK" << endl;
-		}
-		catch (exception& e)
-		{
-			++fail_count;
-			cerr << test_name << " fail: " << e.what() << endl;
-		}
-		catch (...)
-		{
-			++fail_count;
-			cerr << "Unknown exception caught" << endl;
-		}
-	}
-
-	~TestRunner()
-	{
-		if (fail_count > 0)
-		{
-			cerr << fail_count << " unit tests failed. Terminate" << endl;
-			exit(1);
-		}
-	}
-
-private:
-	int fail_count = 0;
-};
-
-//bool IsPalindrom(string s)
+//class PhoneNumber
 //{
-//	for (size_t i = 0; i < s.size() / 2; ++i)
-//	{
-//		if (s[i] != s[s.size() - i - 1])
-//		{
-//			return false;
-//		}
-//	}
-//	return true;
+//public:
+//	explicit PhoneNumber(const string& international_number);
+//
+//	string GetCountryCode() const;
+//	string GetCityCode() const;
+//	string GetLocalNumber() const;
+//	string GetInternationalNumber() const;
+//
+//private:
+//	string country_code_;
+//	string city_code_;
+//	string local_number_;
+//};
+//
+PhoneNumber::PhoneNumber(const string& international_number)
+{
+	if (international_number.empty())
+	{
+		throw invalid_argument("Number cannot be empty");
+	}
+
+	if (international_number[0] != '+')
+	{
+		throw invalid_argument("Number must start with +");
+	}
+
+	string num = international_number.substr(1);
+
+	// checking for the '-' sign between the country code and a full number
+	const auto minusPos = find(begin(num), end(num), '-');
+	if (minusPos == begin(num))
+	{
+		throw invalid_argument("Country code cannot be empty");
+	}
+
+	if (minusPos == end(num))
+	{
+		throw invalid_argument("County code must follow '-'");
+	}
+
+	country_code_.assign(begin(num), minusPos);
+	stoi(country_code_);
+	   
+	const auto secondMinus = find(std::next(minusPos), end(num), '-');
+	if (secondMinus == end(num))
+	{
+		throw invalid_argument("");
+	}
+
+	city_code_.assign(std::next(minusPos), secondMinus);
+	stoi(city_code_);
+
+	local_number_.assign(std::next(secondMinus), end(num));
+}
+
+string PhoneNumber::GetCountryCode() const
+{
+	return country_code_;
+}
+
+string PhoneNumber::GetCityCode() const
+{
+	return city_code_;
+}
+
+string PhoneNumber::GetLocalNumber() const
+{
+	return local_number_;
+}
+
+string PhoneNumber::GetInternationalNumber() const
+{
+	stringstream result;
+	result << "+" << country_code_ << "-" << city_code_ << "-" << local_number_;
+	return result.str();
+}
+
+//int main()
+//{
+//	return 0;
 //}
-
-void RunTests()
-{
-	// Positive
-	Assert(IsPalindrom(""), "emptry string");
-	Assert(IsPalindrom("a"), "one character");
-	Assert(IsPalindrom("aa"), "a");
-	Assert(IsPalindrom("a a"), "'a a'");
-	Assert(IsPalindrom(" a a "), "' a a '");
-	Assert(IsPalindrom("wasitacaroracatisaw"), "wasitacaroracatisaw");
-
-	// neagative
-	Assert(!IsPalindrom("a "), "'a '");
-	Assert(!IsPalindrom(" a"), "' a'");
-	Assert(!IsPalindrom(" a  "), "' a  '");
-	Assert(!IsPalindrom("  a "), "'  a '");
-	Assert(!IsPalindrom("aabb"), "aabb");
-	Assert(!IsPalindrom("122"), "122");
-}
-
-int main()
-{
-	TestRunner runner;
-	runner.RunTest(RunTests, "RunTests");
-	return 0;
-}
