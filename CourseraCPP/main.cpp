@@ -1,36 +1,62 @@
 //#include "pch.h"
-#include "query.h"
-#include "bus_manager.h"
 #include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
 
 using namespace std;
 
+bool IsHigherPriority(const char& prev, const char& next)
+{
+	return (next == '*' || next == '/') && (prev == '+' || prev == '-');
+}
+
 int main()
 {
-	int query_count;
-	Query q;
+	string originalNumber;
+	cin >> originalNumber;
 
-	cin >> query_count;
+	int operationsCount;
+	cin >> operationsCount;
 
-	BusManager bm;
-	for (int i = 0; i < query_count; ++i)
+	queue<pair<char, string>> operations;
+	char prev_operation;
+	char operation = ' ';
+	int bracketsCounter = 0;
+
+	while (operationsCount > 0)
 	{
-		cin >> q;
-		switch (q.type)
+		prev_operation = operation;
+		string number;
+		cin >> operation >> number;
+		operations.push({ operation, number });
+		if (IsHigherPriority(prev_operation, operation))
 		{
-			case QueryType::NewBus:
-				bm.AddBus(q.bus, q.stops);
-				break;
-			case QueryType::BusesForStop:
-				cout << bm.GetBusesForStop(q.stop) << endl;
-				break;
-			case QueryType::StopsForBus:
-				cout << bm.GetStopsForBus(q.bus) << endl;
-				break;
-			case QueryType::AllBuses:
-				cout << bm.GetAllBuses() << endl;
-				break;
+			++bracketsCounter;
 		}
+
+		--operationsCount;
+	}
+
+	for (int i = 0; i < bracketsCounter; ++i)
+	{
+		cout << "(";
+	}
+
+	cout << originalNumber;
+
+	operation = ' ';
+	while (!operations.empty())
+	{
+		prev_operation = operation;
+		auto& op = operations.front();
+		operation = op.first;
+		if (IsHigherPriority(prev_operation, operation))
+		{
+			cout << ")";
+		}
+		cout << " " << operation << " " << op.second;
+		operations.pop();
 	}
 
 	return 0;
