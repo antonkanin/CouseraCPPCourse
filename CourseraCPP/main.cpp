@@ -1,152 +1,108 @@
-//#include "pch.h"
+#include "pch.h"
 #include <iostream>
 #include <string>
 #include <vector>
-#include <iomanip>
-#include <sstream>
-#include <cmath>
-#include <memory>
 
 using namespace std;
 
-class Figure
+class Human
 {
 public:
-	virtual ~Figure() = default;
+	explicit Human(const string& name, const string& type) : name_(name), type_(type)
+	{}
+	virtual ~Human() = default;
 
-	virtual string Name() const = 0;
-	virtual double Perimeter() const = 0;
-	virtual double Area() const = 0;
+	virtual void Walk(const string& destination) const
+	{
+		cout << Type() << ": " << Name() << " walks to: " << destination << endl;
+	}
+
+	string Name() const
+	{
+		return name_;
+	}
+
+	string Type() const
+	{
+		return type_;
+	}
+
+private:
+	string name_;
+	string type_;
 };
 
-class Triangle : public Figure
+class Student : public Human
 {
 public:
-	Triangle(float a, float b, float c) : a(a), b(b), c(c)
+	Student(const string& name, const string& favourite_song) :
+		Human(name, "Student"), favourite_song_(favourite_song)
 	{}
 
-	string Name() const override
+	void Learn() const
 	{
-		return "TRIANGLE";
+		cout << Type() << " " << Name() << " learns" << endl;
 	}
 
-	double Perimeter() const override
+	void Walk(const string& destination) const override
 	{
-		return a + b + c;
+		Human::Walk(destination);
+		SingSong();
 	}
 
-	double Area() const override
+	void SingSong() const
 	{
-		double p = (a + b + c) / 2;
-		return sqrt(p * (p - a) * (p - b) * (p - c));
+		cout << Type() << ": " << Name() << " sings a song: " << favourite_song_ << endl;
 	}
 
 private:
-	double a, b, c;
+	string favourite_song_;
 };
 
-class Rect : public Figure
+class Teacher : public Human
 {
 public:
-	Rect(const float& a, const float& b) : a(a), b(b) {}
+	Teacher(const string& name, const string& subject) : Human(name, "Teacher"), subject_(subject)
+	{}
 
-	string Name() const override
+	void Teach() const
 	{
-		return "RECT";
-	}
-
-	double Perimeter() const override 
-	{
-		return 2 * (a + b);
-	}
-
-	double Area() const override
-	{
-		return a * b;
+		cout << "Teacher: " << Name() << " teaches: " << subject_ << endl;
 	}
 
 private:
-	float a, b;
+	string subject_;
 };
 
-class Circle : public Figure
+class Policeman : public Human
 {
 public:
-	Circle(double r) : r(r) {}
+	Policeman(const string& name) : Human(name, "Policeman")
+	{}
 
-	string Name() const override
+	void Check(const Human& human) const
 	{
-		return "CIRCLE";
+		cout << "Policeman: " << Name() << " checks " << human.Type() << ". "
+			<< human.Type() << "'s name is: " << human.Name() << endl;
 	}
-
-	double Perimeter() const override
-	{
-		return 2 * PI * r;
-	}
-
-	double Area() const override
-	{
-		return PI * r * r;
-	}
-
-private:
-	float r;
-
-	const double PI = 3.14;
 };
 
-shared_ptr<Figure> CreateFigure(istream& inputStream)
+void VisitPlaces(const Human& human, const vector<string>& places)
 {
-	string type;
-	inputStream >> type;
-
-	if (type == "RECT")
+	for (const auto& place : places)
 	{
-		float a, b;
-		inputStream >> a >> b;
-		return make_shared<Rect>(a, b);
-	} 
-	
-	if (type == "TRIANGLE")
-	{
-		float a, b, c;
-		inputStream >> a >> b >> c;
-		return make_shared<Triangle>(a, b, c);
-	}
-
-	if (type == "CIRCLE")
-	{
-		float r;
-		inputStream >> r;
-		return make_shared<Circle>(r);
+		human.Walk(place);
 	}
 }
 
 int main()
 {
-	vector<shared_ptr<Figure>> figures;
-	for (string line; getline(cin, line); )
-	{
-		istringstream is(line);
+	const Teacher t("Jim", "Math");
+	const Student s("Ann", "We will rock you");
+	Policeman p("Bob");
 
-		string command;
-		is >> command;
-
-		if (command == "ADD")
-		{
-			figures.push_back(CreateFigure(is));
-		}
-
-		else if (command == "PRINT")
-		{
-			for (const auto& current_figure : figures)
-			{
-				cout << fixed << setprecision(3)
-					<< current_figure->Name() << " "
-					<< current_figure->Perimeter() << " "
-					<< current_figure->Area() << endl;
-			}
-		}
-	}
+	VisitPlaces(t, { "Moscow", "London" });
+	p.Check(s);
+	VisitPlaces(s, { "Moscow", "London" });
 	return 0;
 }
