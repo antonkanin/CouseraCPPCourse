@@ -1,108 +1,148 @@
 #include "pch.h"
+#include <iomanip>
 #include <iostream>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
+#include "Date.h"
+#include "Database.h"
+#include "condition_parser.h"
 
 using namespace std;
 
-class Human
+//Date ParseDate(const string& date)
+Date ParseDate(istream& date_stream)
 {
-public:
-	explicit Human(const string& name, const string& type) : name_(name), type_(type)
-	{}
-	virtual ~Human() = default;
+	bool ok = true;
 
-	virtual void Walk(const string& destination) const
+	int year;
+	ok = ok && (date_stream >> year);
+	ok = ok && (date_stream.peek() == '-');
+	date_stream.ignore(1);
+
+	int month;
+	ok = ok && (date_stream >> month);
+	ok = ok && (date_stream.peek() == '-');
+	date_stream.ignore(1);
+
+	int day;
+	ok = ok && (date_stream >> day);
+	ok = ok && date_stream.eof();
+
+	if (!ok)
 	{
-		cout << Type() << ": " << Name() << " walks to: " << destination << endl;
+		throw logic_error("Wrong date format");
 	}
-
-	string Name() const
-	{
-		return name_;
-	}
-
-	string Type() const
-	{
-		return type_;
-	}
-
-private:
-	string name_;
-	string type_;
-};
-
-class Student : public Human
-{
-public:
-	Student(const string& name, const string& favourite_song) :
-		Human(name, "Student"), favourite_song_(favourite_song)
-	{}
-
-	void Learn() const
-	{
-		cout << Type() << " " << Name() << " learns" << endl;
-	}
-
-	void Walk(const string& destination) const override
-	{
-		Human::Walk(destination);
-		SingSong();
-	}
-
-	void SingSong() const
-	{
-		cout << Type() << ": " << Name() << " sings a song: " << favourite_song_ << endl;
-	}
-
-private:
-	string favourite_song_;
-};
-
-class Teacher : public Human
-{
-public:
-	Teacher(const string& name, const string& subject) : Human(name, "Teacher"), subject_(subject)
-	{}
-
-	void Teach() const
-	{
-		cout << "Teacher: " << Name() << " teaches: " << subject_ << endl;
-	}
-
-private:
-	string subject_;
-};
-
-class Policeman : public Human
-{
-public:
-	Policeman(const string& name) : Human(name, "Policeman")
-	{}
-
-	void Check(const Human& human) const
-	{
-		cout << "Policeman: " << Name() << " checks " << human.Type() << ". "
-			<< human.Type() << "'s name is: " << human.Name() << endl;
-	}
-};
-
-void VisitPlaces(const Human& human, const vector<string>& places)
-{
-	for (const auto& place : places)
-	{
-		human.Walk(place);
-	}
+	return Date(year, month, day);
 }
+
+string ParseEvent(istream& is)
+{
+	string result;
+	getline(is, result);
+	return result;
+}
+
+void TestAll();
 
 int main()
 {
-	const Teacher t("Jim", "Math");
-	const Student s("Ann", "We will rock you");
-	Policeman p("Bob");
+	TestAll();
 
-	VisitPlaces(t, { "Moscow", "London" });
-	p.Check(s);
-	VisitPlaces(s, { "Moscow", "London" });
+	Database db;
+
+	for (string line; getline(cin, line); )
+	{
+		istringstream is(line);
+
+		string command;
+		is >> command;
+		if (command == "Add")
+		{
+			const auto date = ParseDate(is);
+			const auto event = ParseEvent(is);
+			db.Add(date, event);
+		}
+		else if (command == "Print")
+		{
+			db.Print(cout);
+		}
+		else if (command == "Del")
+		{
+			auto condition = ParseCondition(is);
+			auto predicate = [condition](const Date& date, const string& event)
+			{
+				return condition->Evaluate(date, event);
+			};
+			int count = db.RemoveIf(predicate);
+			cout << "Removed " << count << " entries" << endl;
+		}
+		else if (command == "Find")
+		{
+			auto condition = ParseCondition(is);
+			auto predicate = [condition](const Date& date, const string& event)
+			{
+				return condition->Evaluate(date, event);
+			};
+
+			const auto entries = db.FindIf(predicate);
+			for (const auto& entry : entries)
+			{
+				cout << entry << endl;
+			}
+			cout << "Found " << entries.size() << " entries" << endl;
+		}
+
+		else if (command == "Last")
+		{
+			try
+			{
+				cout << db.Last(ParseDate(is)) << endl;
+			}
+			catch (invalid_argument&)
+			{
+				cout << "No entries" << endl;
+			}
+		}
+
+		else if (command.empty())
+		{
+			continue;
+		}
+		else
+		{
+			throw logic_error("Unknown command: " + command);
+		}
+	}
+
 	return 0;
+}
+
+void TestParseEvent()
+{
+	{
+		istringstream is("event");
+		AssertEqual(ParseEvent(is), "event", "Parse event without leading spaces");
+	}
+	{
+		istringstream is("   sport event ");
+		AssertEqual(ParseEvent(is), "sport event ", "Parse event with leading spaces");
+	}
+	{
+		istringstream is("  first event  \n  second event");
+		vector<string> events;
+		events.push_back(ParseEvent(is));
+		events.push_back(ParseEvent(is));
+		AssertEqual(events, vector<string>{"first event  ", "second event"}, "Parse multiple events");
+	}
+}
+
+void TestAll()
+{
+	TestRunner tr;
+	tr.RunTest(TestParseEvent, "TestParseEvent");
+	tr.RunTest(TestParseCondition, "TestParseCondition");
 }
