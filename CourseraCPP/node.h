@@ -2,6 +2,8 @@
 
 #include <string>
 
+enum class Comparison;
+
 using namespace std;
 
 class Date;
