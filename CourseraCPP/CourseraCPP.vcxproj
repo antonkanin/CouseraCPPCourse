@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="comparison.h" />
     <ClInclude Include="condition_parser.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="Date.h" />

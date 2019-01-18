@@ -40,7 +40,7 @@ vector<Token> Tokenize(istream& cl)
 		{
 			if (cl.get() == 'a' && cl.get() == 't' && cl.get() == 'e')
 			{
-				tokens.push_back({ "Date", TokenType::COLUMN });
+				tokens.push_back({ "date", TokenType::COLUMN });
 			}
 			else
 			{

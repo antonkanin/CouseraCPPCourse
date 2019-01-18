@@ -3,11 +3,9 @@
 #include <string>
 #include <memory>
 #include "Date.h"
+#include "comparison.h"
 
 using namespace std;
-
-class Date;
-enum class Comparison;
 
 enum class LogicalOperation
 {
@@ -20,7 +18,7 @@ public:
 	Node();
 	~Node();
 
-	void Evaluate(const Date& date, const string& event);
+	virtual bool Evaluate(const Date& date, const string& event);
 };
 
 typedef shared_ptr<Node> NodePtr;
@@ -36,6 +34,8 @@ public:
 	DateComparisonNode(const Comparison& comparison, const Date& date) 
 		: comparison_(comparison), date_(date) {}
 
+	bool Evaluate(const Date& date, const string& event) override;
+
 private:
 	Comparison comparison_;
 	Date date_;
@@ -46,6 +46,8 @@ class LogicalOperationNode : public Node
 public:
 	LogicalOperationNode(const LogicalOperation& operation, const NodePtr& lhs, const NodePtr& rhs)
 		: operation_(operation), left_(lhs), right_(rhs) {}
+
+	bool Evaluate(const Date& date, const string& event) override;
 
 private:
 	LogicalOperation operation_;
@@ -58,6 +60,8 @@ class EventComparisonNode : public Node
 public:
 	EventComparisonNode(const Comparison& comparison, const string& event_name)
 		: comparison_(comparison), event_name_(event_name) {}
+
+	bool Evaluate(const Date& date, const string& event) override;
 
 private:
 	Comparison comparison_;

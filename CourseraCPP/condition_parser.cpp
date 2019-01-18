@@ -8,11 +8,6 @@
 
 using namespace std;
 
-enum class Comparison
-{
-	Less, LessOrEqual, Greater, GreaterOrEqual, Equal, NotEqual
-};
-
 template <class It> shared_ptr<Node> ParseComparison(It& current, It end)
 {
 	if (current == end)

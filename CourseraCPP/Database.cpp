@@ -12,16 +12,6 @@ string Database::Last(Date date)
 	return {};
 }
 
-bool Database::DeleteEvent(const Date& date, const string& event)
-{
-	if (storage.count(date) > 0 && storage[date].count(event) > 0)
-	{
-		storage[date].erase(event);
-		return true;
-	}
-	return false;
-}
-
 int Database::DeleteDate(const Date& date)
 {
 	if (storage.count(date) == 0)

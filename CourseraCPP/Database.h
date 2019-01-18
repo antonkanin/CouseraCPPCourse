@@ -3,7 +3,9 @@
 #include "Date.h"
 #include <map>
 #include <set>
-#include <iostream>
+#include <utility>
+#include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -16,19 +18,11 @@ public:
 	int RemoveIf(Pr);
 
 	template <typename Pr>
-	set<string> FindIf(Pr) const;
+	vector<string> FindIf(Pr) const;
 
 	string Last(Date date);
 
-
-
-	// old events
-	void AddEvent(const Date& date, const string& event);
-
-	bool DeleteEvent(const Date& date, const string& event);
-
 	int DeleteDate(const Date& date);
-
 
 	void Print(ostream& outputStream) const;
 
@@ -47,7 +41,22 @@ int Database::RemoveIf(Pr)
 }
 
 template <typename Pr>
-set<string> Database::FindIf(Pr) const
+vector<string> Database::FindIf(Pr predicate) const
 {
-	return { {} };
+	vector<string> result;
+
+	for (auto& date : storage)
+	{
+		for (auto& event : date.second)
+		{
+			if (predicate(date.first, event))
+			{
+				stringstream ss;
+				ss << date.first << " " << event;
+				result.push_back(ss.str());
+			}
+		}
+	}
+
+	return result;
 }

@@ -47,7 +47,9 @@ Date ParseDate(istream& date_stream)
 
 	int day;
 	ok = ok && (date_stream >> day);
-	ok = ok && date_stream.eof();
+	
+	// disable this check since we do not expect end of the string
+	//ok = ok && date_stream.eof();
 
 	if (!ok)
 	{

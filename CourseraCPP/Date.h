@@ -29,6 +29,32 @@ inline bool operator<(const Date& lhs, const Date& rhs)
 		vector<int>{rhs.GetYear(), rhs.GetMonth(), rhs.GetDay()};
 }
 
+inline bool operator==(const Date& lhs, const Date& rhs)
+{
+	return vector<int>{lhs.GetYear(), lhs.GetMonth(), lhs.GetDay()} ==
+		vector<int>{rhs.GetYear(), rhs.GetMonth(), rhs.GetDay()};
+}
+
+inline bool operator <=(const Date& lhs, const Date& rhs)
+{
+	return lhs < rhs || lhs == rhs;
+}
+
+inline bool operator>(const Date& lhs, const Date& rhs)
+{
+	return rhs < lhs;
+}
+
+inline bool operator>=(const Date& lhs, const Date& rhs)
+{
+	return rhs <= lhs;
+}
+
+inline bool operator!=(const Date& lhs, const Date& rhs)
+{
+	return !(lhs == rhs);
+}
+
 inline ostream& operator<<(ostream& stream, const Date& date)
 {
 	stream << setw(4) << setfill('0') << date.GetYear() <<

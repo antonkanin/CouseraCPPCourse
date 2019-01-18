@@ -9,6 +9,7 @@
 #include "Date.h"
 #include "Database.h"
 #include "condition_parser.h"
+#include <fstream>
 
 using namespace std;
 
@@ -21,10 +22,8 @@ string ParseEvent(istream& is)
 
 //void TestAll();
 
-int main()
+void DoWork(istream& cin)
 {
-	// TestAll();
-
 	Database db;
 
 	for (string line; getline(cin, line); )
@@ -91,6 +90,17 @@ int main()
 		}
 	}
 
+}
+
+int main()
+{
+	ifstream file("input.txt");
+	
+	DoWork(file);
+
+	//DoWork(cin);
+	// TestAll();
+	
 	return 0;
 }
 
