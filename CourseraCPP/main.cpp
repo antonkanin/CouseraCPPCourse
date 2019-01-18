@@ -1,21 +1,20 @@
 #include "pch.h"
-#include <iomanip>
 #include <iostream>
-#include <map>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <fstream>
+
 #include "Date.h"
 #include "Database.h"
 #include "condition_parser.h"
-#include <fstream>
 
 using namespace std;
 
 string ParseEvent(istream& is)
 {
 	string result;
+	is >> ws;
 	getline(is, result);
 	return result;
 }
@@ -94,11 +93,11 @@ void DoWork(istream& cin)
 
 int main()
 {
-	ifstream file("input.txt");
-	
-	DoWork(file);
+	//ifstream file("input.txt");
+	//DoWork(file);
 
-	//DoWork(cin);
+	DoWork(cin);
+
 	// TestAll();
 	
 	return 0;

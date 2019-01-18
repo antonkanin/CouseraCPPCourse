@@ -5,7 +5,6 @@
 #include <set>
 #include <utility>
 #include <sstream>
-#include <algorithm>
 
 using namespace std;
 
@@ -31,13 +30,42 @@ private:
 };
 
 template <typename Pr>
-int Database::RemoveIf(Pr)
+int Database::RemoveIf(Pr predicate)
 {
-	//if (storage.count(Pr.Date))
-	//{
-	//	
-	//}
-	return 0;
+	int removedCount = 0;
+
+	for (auto it = storage.begin(); it != storage.end();)
+	{
+		if (predicate(it->first, {}))
+		{
+			removedCount += storage[it->first].size();
+			storage.erase(it++);
+		}
+		else
+		{
+			if (storage.count(it->first) > 0)
+			{
+				removedCount += storage.count(it->first);
+				auto& events = storage.at(it->first);
+
+				for (auto it_event = events.begin(); it_event != events.end();)
+				{
+					if (predicate(it->first, *it_event))
+					{
+						events.erase(it_event++);
+					}
+					else
+					{
+						++it_event;
+					}
+				}
+			}
+
+			++it;
+		}
+	}
+
+	return removedCount;
 }
 
 template <typename Pr>

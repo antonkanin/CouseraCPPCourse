@@ -9,6 +9,12 @@ void Database::Add(const Date& date, const string& event)
 
 string Database::Last(Date date)
 {
+	const auto it = storage.upper_bound(date);
+	if (it != begin(storage))
+	{
+		const auto back = prev(it)->second.end();
+		return *prev(back);
+	}
 	return {};
 }
 
