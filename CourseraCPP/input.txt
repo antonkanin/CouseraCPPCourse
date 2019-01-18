@@ -1,4 +1,5 @@
-Add 2017-06-01 1st of June
-Add 2017-07-08 8th of July
-Add 2017-07-08 Someone's birthday
-Find date == 2017-07-08
+Add 2017-01-01 Holiday
+Add 2017-03-08 Holiday
+Add 2017-01-01 New Year
+Find event != "working day"
+Add 2017-05-09 Holiday

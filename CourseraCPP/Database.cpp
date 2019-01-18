@@ -2,7 +2,11 @@
 
 void Database::Add(const Date& date, const string& event)
 {
-	storage[date].insert(event);
+	if (storage.count(date) == 0 || storage[date].first.count(event) == 0)
+	{
+		storage[date].first.insert(event);
+		storage[date].second.push_back(event);
+	}
 }
 
 string Database::Last(Date date)
@@ -10,10 +14,15 @@ string Database::Last(Date date)
 	const auto it = storage.upper_bound(date);
 	if (it != begin(storage))
 	{
-		const auto back = prev(it)->second.end();
-		return *prev(back);
+		const auto record = prev(it);
+		const auto lastDate = record->first;
+		const auto lastEvent = record->second.second.back();
+		stringstream result;
+		result << lastDate << " " << lastEvent;
+		return result.str();
 	}
-	return {};
+
+	throw invalid_argument("No entries");
 }
 
 int Database::DeleteDate(const Date& date)
@@ -24,7 +33,7 @@ int Database::DeleteDate(const Date& date)
 	}
 	else
 	{
-		const int event_count = storage[date].size();
+		const int event_count = storage[date].second.size();
 		storage.erase(date);
 		return event_count;
 	}
@@ -34,7 +43,7 @@ void Database::Print(ostream& outputStream) const
 {
 	for (const auto& item : storage)
 	{
-		for (const string& event : item.second)
+		for (const string& event : item.second.second)
 		{
 			outputStream << item.first << " " << event << endl;
 		}
