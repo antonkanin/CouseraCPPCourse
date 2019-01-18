@@ -18,6 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="comparison.h" />
+    <ClInclude Include="condition_parser.h" />
+    <ClInclude Include="database.h" />
+    <ClInclude Include="date.h" />
+    <ClInclude Include="node.h" />
+    <ClInclude Include="token.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="condition_parser.cpp" />
+    <ClCompile Include="database.cpp" />
+    <ClCompile Include="date.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="node.cpp" />
+    <ClCompile Include="token.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{DF9EB749-E812-46EA-A35B-096D2EF9B7AF}</ProjectGuid>
@@ -150,29 +166,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="comparison.h" />
-    <ClInclude Include="condition_parser.h" />
-    <ClInclude Include="Database.h" />
-    <ClInclude Include="Date.h" />
-    <ClInclude Include="node.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="token.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="condition_parser.cpp" />
-    <ClCompile Include="Database.cpp" />
-    <ClCompile Include="Date.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Node.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="token.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

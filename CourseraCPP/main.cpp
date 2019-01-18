@@ -4,8 +4,8 @@
 #include <string>
 #include <fstream>
 
-#include "Date.h"
-#include "Database.h"
+#include "date.h"
+#include "database.h"
 #include "condition_parser.h"
 
 using namespace std;

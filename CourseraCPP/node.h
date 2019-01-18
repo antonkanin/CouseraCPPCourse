@@ -2,7 +2,7 @@
 
 #include <string>
 #include <memory>
-#include "Date.h"
+#include "date.h"
 #include "comparison.h"
 
 using namespace std;
