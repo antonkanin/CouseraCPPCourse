@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "Database.h"
 
 void Database::Add(const Date& date, const string& event)
