@@ -2,13 +2,20 @@
 #include "condition_parser.h"
 #include "token.h"
 #include "node.h"
+#include "Date.h"
 #include <map>
+#include <sstream>
 
 using namespace std;
 
 enum class Comparison
 {
 	Less, LessOrEqual, Greater, GreaterOrEqual, Equal, NotEqual
+};
+
+enum class LogicalOperation
+{
+	Or, And
 };
 
 template <class It> shared_ptr<Node> ParseComparison(It& current, It end)
@@ -124,6 +131,7 @@ shared_ptr<Node> ParseExpression(It& current, It end, unsigned precedence)
 
 		const auto logical_operation = current->value == "AND" ? LogicalOperation::And
 			: LogicalOperation::Or;
+
 		const auto current_precedence = precedences.at(logical_operation);
 		if (current_precedence <= precedence)
 		{

@@ -7,6 +7,11 @@ void Database::Add(const Date& date, const string& event)
 	storage[date].insert(event);
 }
 
+string Database::Last(Date date)
+{
+	return {};
+}
+
 bool Database::DeleteEvent(const Date& date, const string& event)
 {
 	if (storage.count(date) > 0 && storage[date].count(event) > 0)
@@ -28,18 +33,6 @@ int Database::DeleteDate(const Date& date)
 		const int event_count = storage[date].size();
 		storage.erase(date);
 		return event_count;
-	}
-}
-
-set<string> Database::Find(const Date& date) const
-{
-	if (storage.count(date) > 0)
-	{
-		return storage.at(date);
-	}
-	else
-	{
-		return {};
 	}
 }
 

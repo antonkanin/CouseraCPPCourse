@@ -6,38 +6,13 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 #include "Date.h"
 #include "Database.h"
 #include "condition_parser.h"
 
 using namespace std;
 
-//Date ParseDate(const string& date)
-Date ParseDate(istream& date_stream)
-{
-	bool ok = true;
-
-	int year;
-	ok = ok && (date_stream >> year);
-	ok = ok && (date_stream.peek() == '-');
-	date_stream.ignore(1);
-
-	int month;
-	ok = ok && (date_stream >> month);
-	ok = ok && (date_stream.peek() == '-');
-	date_stream.ignore(1);
-
-	int day;
-	ok = ok && (date_stream >> day);
-	ok = ok && date_stream.eof();
-
-	if (!ok)
-	{
-		throw logic_error("Wrong date format");
-	}
-	return Date(year, month, day);
-}
+//Date ParseDate(const string& Date)
 
 string ParseEvent(istream& is)
 {
@@ -121,28 +96,28 @@ int main()
 	return 0;
 }
 
-void TestParseEvent()
-{
-	{
-		istringstream is("event");
-		AssertEqual(ParseEvent(is), "event", "Parse event without leading spaces");
-	}
-	{
-		istringstream is("   sport event ");
-		AssertEqual(ParseEvent(is), "sport event ", "Parse event with leading spaces");
-	}
-	{
-		istringstream is("  first event  \n  second event");
-		vector<string> events;
-		events.push_back(ParseEvent(is));
-		events.push_back(ParseEvent(is));
-		AssertEqual(events, vector<string>{"first event  ", "second event"}, "Parse multiple events");
-	}
-}
-
-void TestAll()
-{
-	TestRunner tr;
-	tr.RunTest(TestParseEvent, "TestParseEvent");
-	tr.RunTest(TestParseCondition, "TestParseCondition");
-}
+//void TestParseEvent()
+//{
+//	{
+//		istringstream is("event");
+//		AssertEqual(ParseEvent(is), "event", "Parse event without leading spaces");
+//	}
+//	{
+//		istringstream is("   sport event ");
+//		AssertEqual(ParseEvent(is), "sport event ", "Parse event with leading spaces");
+//	}
+//	{
+//		istringstream is("  first event  \n  second event");
+//		vector<string> events;
+//		events.push_back(ParseEvent(is));
+//		events.push_back(ParseEvent(is));
+//		AssertEqual(events, vector<string>{"first event  ", "second event"}, "Parse multiple events");
+//	}
+//}
+//
+//void TestAll()
+//{
+//	TestRunner tr;
+//	tr.RunTest(TestParseEvent, "TestParseEvent");
+//	tr.RunTest(TestParseCondition, "TestParseCondition");
+//}

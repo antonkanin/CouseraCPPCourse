@@ -11,7 +11,7 @@ class Date;
 class Node
 {
 public:
-	Node(Comparison comparison, );
+	Node();
 	~Node();
 
 	void Evaluate(const Date& date, const string& event);
@@ -27,7 +27,7 @@ class DateComparisonNode : public Node
 	
 };
 
-class LogicalOperatorNode : public Node
+class LogicalOperationNode : public Node
 {
 	
 };

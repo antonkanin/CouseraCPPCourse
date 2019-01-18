@@ -1,6 +1,9 @@
+#include "pch.h"
 #include "token.h"
+#include <locale>
+#include <cctype>
+#include "Date.h"
 
-#include <stdexcept>
 
 using namespace std;
 
@@ -37,7 +40,7 @@ vector<Token> Tokenize(istream& cl)
 		{
 			if (cl.get() == 'a' && cl.get() == 't' && cl.get() == 'e')
 			{
-				tokens.push_back({ "date", TokenType::COLUMN });
+				tokens.push_back({ "Date", TokenType::COLUMN });
 			}
 			else
 			{
