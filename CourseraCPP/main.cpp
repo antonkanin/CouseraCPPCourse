@@ -12,8 +12,6 @@
 
 using namespace std;
 
-//Date ParseDate(const string& Date)
-
 string ParseEvent(istream& is)
 {
 	string result;
@@ -21,11 +19,11 @@ string ParseEvent(istream& is)
 	return result;
 }
 
-void TestAll();
+//void TestAll();
 
 int main()
 {
-	TestAll();
+	// TestAll();
 
 	Database db;
 

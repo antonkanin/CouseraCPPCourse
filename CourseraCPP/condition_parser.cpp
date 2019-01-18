@@ -13,11 +13,6 @@ enum class Comparison
 	Less, LessOrEqual, Greater, GreaterOrEqual, Equal, NotEqual
 };
 
-enum class LogicalOperation
-{
-	Or, And
-};
-
 template <class It> shared_ptr<Node> ParseComparison(It& current, It end)
 {
 	if (current == end)
