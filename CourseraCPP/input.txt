@@ -1,11 +1,13 @@
-Add 2017-11-21 Monday
-Add 2017-11-21 Tuesday
-Add 2017-11-22 Monday
-Add 2017-11-22 Tuesday
-Add 2017-11-23 Monday
-Add 2017-11-23 Tuesday
-Print
-Del event == "Monday" OR event == "Tuesday"
-Print
-Del event == "Monday" OR event == "Tuesday"
+Add 2017-11-21 1
+Add 2017-11-21 4
+Add 2017-11-21 3
+Add 2017-11-21 4
+Add 2017-11-21 2
+Add 2017-11-22 2
+Add 2017-11-22 1
+Add 2017-11-23 2
+Add 2017-11-23 1
+Add 2017-11-23 4
+Del (date >= 2017-11-23 AND event == "4") OR (event == "4" AND date < 2017-11-21)
+Del (date >= 2017-11-23 AND event == "4") OR (event == "4" AND date < 2017-11-21)
 Print
