@@ -15,17 +15,15 @@ enum class LogicalOperation
 class Node
 {
 public:
-	Node();
-	~Node();
-
-	virtual bool Evaluate(const Date& date, const string& event);
+	virtual bool Evaluate(const Date& date, const string& event) = 0;
 };
 
 typedef shared_ptr<Node> NodePtr;
 
 class EmptyNode : public Node
 {
-
+public:
+	bool Evaluate(const Date& date, const string& event) override;
 };
 
 class DateComparisonNode : public Node

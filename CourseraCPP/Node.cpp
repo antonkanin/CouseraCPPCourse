@@ -1,16 +1,8 @@
 #include "node.h"
 
-
-Node::Node()
-{}
-
-
-Node::~Node()
-{}
-
-bool Node::Evaluate(const Date& date, const string& event)
+bool EmptyNode::Evaluate(const Date& date, const string& event)
 {
-	return true;
+	return false;
 }
 
 bool DateComparisonNode::Evaluate(const Date& date, const string& event)
