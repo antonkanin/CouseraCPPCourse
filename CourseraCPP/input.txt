@@ -1,9 +1,11 @@
+Add 2017-11-21 Monday
 Add 2017-11-21 Tuesday
-Add 2017-11-20 Monday
-Add 2017-11-21 Weekly meeting
+Add 2017-11-22 Monday
+Add 2017-11-22 Tuesday
+Add 2017-11-23 Monday
+Add 2017-11-23 Tuesday
 Print
-Find event != "Weekly meeting"
-Last 2017-11-30
-Del date > 2017-11-20
-Last 2017-11-30
-Last 2017-11-01
+Del event == "Monday" OR event == "Tuesday"
+Print
+Del event == "Monday" OR event == "Tuesday"
+Print

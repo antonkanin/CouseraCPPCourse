@@ -43,53 +43,48 @@ int Database::RemoveIf(Pr predicate)
 			removedCount += storage[it->first].second.size();
 			storage.erase(it++);
 		}
-		else
+		else if (storage.count(it->first) > 0)
 		{
-			if (storage.count(it->first) > 0)
+			// cleaning up the set
 			{
-				// cleaning up the set
+				auto& events_set = storage.at(it->first).first;
+				for (auto it_set = events_set.begin(); it_set != events_set.end();)
 				{
-
-					auto& events_set = storage.at(it->first).first;
-					for (auto it_set = events_set.begin(); it_set != events_set.end();)
+					if (predicate(it->first, *it_set))
 					{
-						if (predicate(it->first, *it_set))
-						{
-							++removedCount;
-							events_set.erase(it_set++);
-						}
-						else
-						{
-							++it_set;
-						}
+						++removedCount;
+						events_set.erase(it_set++);
+					}
+					else
+					{
+						++it_set;
 					}
 				}
+			}
 
-				// cleaning up the vector
-				{
-					auto& events_vector = storage.at(it->first).second;
-					auto d = it->first;
+			// cleaning up the vector
+			{
+				auto& events_vector = storage.at(it->first).second;
+				auto d = it->first;
 
-					events_vector.erase(
-						remove_if(events_vector.begin(), events_vector.end(), [d, predicate](string item)
+				events_vector.erase(
+					remove_if(events_vector.begin(), events_vector.end(), [d, predicate](const string& item)
 						{
 							return predicate(d, item);
 						}), events_vector.end());
 
-					//for (auto it_vector = events_vector.begin(); it_vector != events_vector.end();)
-					//{
-					//	if (predicate(it->first, *it_vector))
-					//	{
-					//		events_vector.erase(it_vector++);
-					//	}
-					//	else
-					//	{
-					//		++it_vector;
-					//	}
-					//}
+				if (events_vector.size() == 0)
+				{
+					storage.erase(it++);
+				}
+				else
+				{
+					++it;
 				}
 			}
-
+		}
+		else
+		{
 			++it;
 		}
 	}

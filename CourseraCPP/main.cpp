@@ -92,10 +92,10 @@ void DoWork(istream& cin)
 
 int main()
 {
-	//ifstream file("input.txt");
-	//DoWork(file);
+	ifstream file("input.txt");
+	DoWork(file);
 
-	DoWork(cin);
+	//DoWork(cin);
 
 	// TestAll();
 	
