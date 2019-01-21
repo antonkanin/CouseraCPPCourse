@@ -1,5 +1,9 @@
-Add 2017-01-01 Holiday
-Add 2017-03-08 Holiday
-Add 2017-01-01 New Year
-Find event != "working day"
-Add 2017-05-09 Holiday
+Add 2017-11-21 Tuesday
+Add 2017-11-20 Monday
+Add 2017-11-21 Weekly meeting
+Print
+Find event != "Weekly meeting"
+Last 2017-11-30
+Del date > 2017-11-20
+Last 2017-11-30
+Last 2017-11-01

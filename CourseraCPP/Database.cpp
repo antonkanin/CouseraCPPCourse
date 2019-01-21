@@ -9,7 +9,7 @@ void Database::Add(const Date& date, const string& event)
 	}
 }
 
-string Database::Last(Date date)
+string Database::Last(Date date) const
 {
 	const auto it = storage.upper_bound(date);
 	if (it != begin(storage))

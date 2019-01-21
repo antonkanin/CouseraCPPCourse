@@ -43,7 +43,7 @@ void DoWork(istream& cin)
 		else if (command == "Del")
 		{
 			auto condition = ParseCondition(is);
-			auto predicate = [condition](const Date& date, const string& event)
+			const auto predicate = [condition](const Date& date, const string& event)
 			{
 				return condition->Evaluate(date, event);
 			};
@@ -53,7 +53,7 @@ void DoWork(istream& cin)
 		else if (command == "Find")
 		{
 			auto condition = ParseCondition(is);
-			auto predicate = [condition](const Date& date, const string& event)
+			const auto predicate = [condition](const Date& date, const string& event)
 			{
 				return condition->Evaluate(date, event);
 			};

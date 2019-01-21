@@ -5,6 +5,8 @@
 #include <set>
 #include <utility>
 #include <sstream>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -19,7 +21,7 @@ public:
 	template <typename Pr>
 	vector<string> FindIf(Pr) const;
 
-	string Last(Date date);
+	string Last(Date date) const;
 
 	int DeleteDate(const Date& date);
 
@@ -46,35 +48,46 @@ int Database::RemoveIf(Pr predicate)
 			if (storage.count(it->first) > 0)
 			{
 				// cleaning up the set
-				auto& events_set = storage.at(it->first).first;
-				for (auto it_set = events_set.begin(); it_set != events_set.end();)
 				{
-					if (predicate(it->first, *it_set))
+
+					auto& events_set = storage.at(it->first).first;
+					for (auto it_set = events_set.begin(); it_set != events_set.end();)
 					{
-						++removedCount;
-						events_set.erase(it_set++);
-					}
-					else
-					{
-						++it_set;
+						if (predicate(it->first, *it_set))
+						{
+							++removedCount;
+							events_set.erase(it_set++);
+						}
+						else
+						{
+							++it_set;
+						}
 					}
 				}
 
 				// cleaning up the vector
-				auto& events_vector = storage.at(it->first).second;
-				for (auto it_vector = events_vector.begin(); it_vector != events_vector.end();)
 				{
-					if (predicate(it->first, *it_vector))
-					{
-						events_vector.erase(it_vector++);
-					}
-					else
-					{
-						++it_vector;
-					}
+					auto& events_vector = storage.at(it->first).second;
+					auto d = it->first;
+
+					events_vector.erase(
+						remove_if(events_vector.begin(), events_vector.end(), [d, predicate](string item)
+						{
+							return predicate(d, item);
+						}), events_vector.end());
+
+					//for (auto it_vector = events_vector.begin(); it_vector != events_vector.end();)
+					//{
+					//	if (predicate(it->first, *it_vector))
+					//	{
+					//		events_vector.erase(it_vector++);
+					//	}
+					//	else
+					//	{
+					//		++it_vector;
+					//	}
+					//}
 				}
-
-
 			}
 
 			++it;
